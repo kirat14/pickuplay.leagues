@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Pickuplay.Enums;
 
 namespace Pickuplay.Teams.Models;
 
@@ -10,7 +11,10 @@ public class Team
     public long SportTypeId { get; set; }
     public SportType? SportType { get; set; }
 
-    public required string TeamType { get; set; }
+    public TeamGender Gender { get; set; }
+    public TeamAgeGroup AgeGroup { get; set; }
+    public TeamSize TeamSize { get; set; }
+    
     public required string City { get; set; }
 
     // Optional Fields
