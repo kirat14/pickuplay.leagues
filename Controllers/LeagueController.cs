@@ -62,13 +62,12 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
         _context.Leagues.Add(league);
         _context.SaveChanges();
 
-        // Correct - positional
-        return Ok(new LeagueResponse(
+        return Ok(new ApiResponse<LeagueResponse>("success", "League created successfully", new LeagueResponse(
             league.Id,
             league.Name,
             league.City,
             league.DateTime,
             league.Teams.Select(t => t.Name).ToList()
-        ));
+        )));
     }
 }

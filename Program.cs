@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Pickuplay.DTOs;
 using Pickuplay.Services;
+using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
@@ -27,6 +30,28 @@ builder.Services.AddControllers()
 
 // Services
 builder.Services.AddScoped<IStorageService, StorageService>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+        .Where(x => x.Value?.Errors.Count > 0)
+        .Select(x => new
+        {
+            Field = x.Key,
+            Message = x.Value!.Errors.First().ErrorMessage
+        });
+
+        return new BadRequestObjectResult(new ApiResponse<object>(
+            type : "error",
+            message : errors.First().Message,
+            data : null
+        ));
+    };
+});
 
 // Load the public key
 var publicKeyPem = File.ReadAllText("./resources/certs/public.pem");
@@ -64,6 +89,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
