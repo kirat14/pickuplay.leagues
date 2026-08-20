@@ -1,19 +1,32 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Pickuplay.Services;
 using Pickuplay.Teams.Data;
 using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 // Add DbContext with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=E:\\data\\mydb.db")
 );
+
+// Controllers
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
+    });
+
+// Services
+builder.Services.AddScoped<IStorageService, StorageService>();
 
 // Load the public key
 var publicKeyPem = File.ReadAllText("./resources/certs/public.pem");
@@ -33,7 +46,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new RsaSecurityKey(rsa),
 
         ValidateIssuer = true,
-        ValidIssuer = "pickuplay-auth", // must match Spring Boot's issuer claim
+        ValidIssuer = "self", // must match Spring Boot's issuer claim
 
         ValidateAudience = false, // set true later if you add audience claims
 

@@ -8,16 +8,22 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
 
+    public DbSet<League> Leagues { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<SportType> SportTypes { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Team and SportType relationship
+        modelBuilder.Entity<League>()
+        .HasOne(l => l.SportType)
+        .WithMany()
+        .HasForeignKey(l => l.SportTypeId);
+
         modelBuilder.Entity<Team>()
-            .HasOne(t => t.SportType)      // Team has one SportType
-            .WithMany()                     // SportType has many Teams
-            .HasForeignKey(t => t.SportTypeId); // foreign key
+            .HasOne(t => t.League)
+            .WithMany(l => l.Teams)
+            .HasForeignKey(t => t.LeagueId);
+
 
         modelBuilder.Entity<SportType>()
             .ToTable("sport_types", tb => tb.ExcludeFromMigrations())
