@@ -20,7 +20,8 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
 
     [HttpPost]                     // maps HTTP POST requests to this method
     [Authorize(Roles = "ADMIN, ORGANIZER")]                    // requires a valid JWT token to access this endpoint
-    public IActionResult CreateTeam(CreateLeagueRequest request)
+    [Consumes("multipart/form-data")]
+    public IActionResult CreateTeam([FromForm] CreateLeagueRequest request)
     {
         var userIdClaim = User.FindFirst("id")?.Value;
 

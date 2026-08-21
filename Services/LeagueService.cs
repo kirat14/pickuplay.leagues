@@ -53,6 +53,21 @@ class LeagueService : ILeagueService
 
         _context.Leagues.Add(league);
         _context.SaveChanges();
+
+        if (request.Logo != null)
+        {
+            var extension = _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues");
+            league.Logo = extension;
+            _context.SaveChanges();
+        }
+
+        if (request.CoverPhoto != null)
+        {
+            var extension = _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues");
+            league.CoverPhoto = extension;
+            _context.SaveChanges();
+        }
+
         return league;
     }
 }

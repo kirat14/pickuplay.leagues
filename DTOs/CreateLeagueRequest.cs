@@ -23,4 +23,6 @@ public class CreateLeagueRequest
     public TeamGender Gender { get; set; }
     public int MinimumAge { get; set; }
     public string? Comment { get; set; }
+    public IFormFile? Logo {get; set;}
+    public IFormFile? CoverPhoto {get; set;}
 }
