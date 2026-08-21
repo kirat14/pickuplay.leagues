@@ -35,5 +35,7 @@ public class League
 
     public int MinimumAge { get; set; }
 
+    public string? Comment { get; set; }
+
     public List<Team> Teams { get; set; } = new();
 }

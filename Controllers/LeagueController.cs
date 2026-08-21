@@ -48,7 +48,8 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             Format = request.Format,
             PricePlayer = request.PricePlayer,
             Gender = request.Gender,
-            MinimumAge = request.MinimumAge
+            MinimumAge = request.MinimumAge,
+            Comment = request.Comment
         };
 
 
