@@ -51,11 +51,14 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             MinimumAge = request.MinimumAge
         };
 
+
         for (int i = 0; i < request.NbrOfTeams; i++)
         {
+            var teamName = i < request.TeamNames.Count ? request.TeamNames[i] : $"Team {i + 1}";
+
             league.Teams.Add(new Team
             {
-                Name = $"Team {(char)('A' + i)}"
+                Name = teamName
             });
         }
 
