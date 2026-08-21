@@ -22,4 +22,5 @@ public class CreateLeagueRequest
     public decimal PricePlayer { get; set; }
     public TeamGender Gender { get; set; }
     public int MinimumAge { get; set; }
+    public string? Comment { get; set; }
 }

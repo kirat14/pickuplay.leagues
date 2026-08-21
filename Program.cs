@@ -30,6 +30,7 @@ builder.Services.AddControllers()
 
 // Services
 builder.Services.AddScoped<IStorageService, StorageService>();
+builder.Services.AddScoped<ILeagueService, LeagueService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 

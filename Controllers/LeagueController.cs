@@ -11,13 +11,11 @@ namespace Pickuplay.Teams.Controllers;
 [Route("api/leagues")]               // base route: all endpoints here start with /api/teams
 public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), etc.
 {
-    private readonly AppDbContext _context;
-    private readonly IStorageService _storageService;
+    public readonly ILeagueService _leagueService;
 
-    public LeagueController(AppDbContext context, IStorageService storageService)
+    public LeagueController(ILeagueService leagueService)
     {
-        _context = context;
-        _storageService = storageService;
+        _leagueService = leagueService;
     }
 
     [HttpPost]                     // maps HTTP POST requests to this method
@@ -31,40 +29,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             return Unauthorized("User ID could not be found in the token.");
         }
 
-        var league = new League
-        {
-            OrganizerId = organizerId,
-            Name = request.Name,
-            SportTypeId = request.SportTypeId,
-            City = request.City,
-            Address = request.Address,
-            DateTime = request.DateTime,
-            Description = request.Description,
-            StartRegistration = request.StartRegistration,
-            EndRegistration = request.EndRegistration,
-            NbrOfTeams = request.NbrOfTeams,
-            MinTeamPlayers = request.MinTeamPlayers,
-            MaxTeamPlayers = request.MaxTeamPlayers,
-            Format = request.Format,
-            PricePlayer = request.PricePlayer,
-            Gender = request.Gender,
-            MinimumAge = request.MinimumAge,
-            Comment = request.Comment
-        };
-
-
-        for (int i = 0; i < request.NbrOfTeams; i++)
-        {
-            var teamName = i < request.TeamNames.Count ? request.TeamNames[i] : $"Team {i + 1}";
-
-            league.Teams.Add(new Team
-            {
-                Name = teamName
-            });
-        }
-
-        _context.Leagues.Add(league);
-        _context.SaveChanges();
+        League league = _leagueService.CreateLeague(request, organizerId);
 
         return Ok(new ApiResponse<LeagueResponse>("success", "League created successfully", new LeagueResponse(
             league.Id,
