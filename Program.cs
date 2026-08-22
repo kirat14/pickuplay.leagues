@@ -22,9 +22,9 @@ if (builder.Environment.IsDevelopment())
 }
 else
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+    builder.Services.AddDbContext<AppDbContext>(options => 
+        options.UseMySQL(connectionString));
 }
 
 // Controllers
@@ -55,9 +55,9 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         });
 
         return new BadRequestObjectResult(new ApiResponse<object>(
-            type : "error",
-            message : errors.First().Message,
-            data : null
+            type: "error",
+            message: errors.First().Message,
+            data: null
         ));
     };
 });
