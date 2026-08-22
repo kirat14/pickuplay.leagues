@@ -58,3 +58,4 @@ nunit-*.xml
 
 pickuplay.db
 commands
+appsettings.Production.json
