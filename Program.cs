@@ -18,12 +18,15 @@ builder.Services.AddOpenApi();
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite("Data Source=pickuplay.db"));
+        options.UseSqlite("Data Source=E:\\data\\mydb.db")
+        .LogTo(Console.WriteLine, LogLevel.Information)
+        .EnableSensitiveDataLogging()
+        );
 }
 else
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-    builder.Services.AddDbContext<AppDbContext>(options => 
+    builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseMySQL(connectionString));
 }
 

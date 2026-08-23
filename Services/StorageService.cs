@@ -10,7 +10,7 @@ class StorageService : IStorageService
             ?? throw new InvalidOperationException("Storage:The UploadsPath not configured.");
     }
 
-    public string SaveFile(IFormFile file, string fileName, string folderName)
+    public async Task<string> SaveFile(IFormFile file, string fileName, string folderName)
     {
         var extension = Path.GetExtension(file.FileName);
 
@@ -20,10 +20,8 @@ class StorageService : IStorageService
 
         var filePath = Path.Combine(folderPath, $"{fileName}{extension}");
 
-        using(var stream = new FileStream(filePath, FileMode.Create))
-        {
-            file.CopyTo(stream);
-        }
+        await using var stream = new FileStream(filePath, FileMode.Create);
+        await file.CopyToAsync(stream);
 
         return extension;
 

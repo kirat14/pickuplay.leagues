@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization; // gives us [Authorize] attribute
 using Microsoft.AspNetCore.Mvc;
 using Pickuplay.DTOs;
@@ -21,7 +22,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
     [HttpPost]                     // maps HTTP POST requests to this method
     [Authorize(Roles = "ADMIN, ORGANIZER")]                    // requires a valid JWT token to access this endpoint
     [Consumes("multipart/form-data")]
-    public IActionResult CreateTeam([FromForm] CreateLeagueRequest request)
+    public async Task<IActionResult> CreateTeam([FromForm] CreateLeagueRequest request)
     {
         var userIdClaim = User.FindFirst("id")?.Value;
 
@@ -30,7 +31,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             return Unauthorized("User ID could not be found in the token.");
         }
 
-        League league = _leagueService.CreateLeague(request, organizerId);
+        League league = await _leagueService.CreateLeague(request, organizerId);
 
         return Ok(new ApiResponse<LeagueResponse>("success", "League created successfully", new LeagueResponse(
             league.Id,

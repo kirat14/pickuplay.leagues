@@ -16,7 +16,7 @@ class LeagueService : ILeagueService
         _storageService = storageService;
     }
 
-    public League CreateLeague(CreateLeagueRequest request, int organizerId)
+    public async Task<League> CreateLeague(CreateLeagueRequest request, int organizerId)
     {
 
         var league = new League
@@ -54,19 +54,19 @@ class LeagueService : ILeagueService
         _context.Leagues.Add(league);
         _context.SaveChanges();
 
-        if (request.Logo != null)
-        {
-            var extension = _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues");
-            league.Logo = extension;
-            _context.SaveChanges();
-        }
+        var logoTask = request.Logo != null
+        ? _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues")
+        : Task.FromResult<string?>(null);
 
-        if (request.CoverPhoto != null)
-        {
-            var extension = _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues");
-            league.CoverPhoto = extension;
-            _context.SaveChanges();
-        }
+        var coverTask = request.CoverPhoto != null
+            ? _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues")
+            : Task.FromResult<string?>(null);
+
+        await Task.WhenAll(logoTask, coverTask);
+
+        league.Logo = await logoTask;
+        league.CoverPhoto = await coverTask;
+        _context.SaveChanges();
 
         return league;
     }

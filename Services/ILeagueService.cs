@@ -6,5 +6,5 @@ namespace Pickuplay.Services;
 
 public interface ILeagueService
 {
-    League CreateLeague(CreateLeagueRequest request, int organizerId);
+    Task<League> CreateLeague(CreateLeagueRequest request, int organizerId);
 }
