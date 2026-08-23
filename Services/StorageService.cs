@@ -7,7 +7,7 @@ class StorageService : IStorageService
     public StorageService(IConfiguration configuration)
     {
         _uploadsPath = configuration["Storage:UploadsPath"] 
-            ?? throw new InvalidOperationException("Storage:UploadsPath not configured.");
+            ?? throw new InvalidOperationException("Storage:The UploadsPath not configured.");
     }
 
     public string SaveFile(IFormFile file, string fileName, string folderName)
