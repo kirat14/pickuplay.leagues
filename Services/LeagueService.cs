@@ -16,7 +16,7 @@ class LeagueService : ILeagueService
         _storageService = storageService;
     }
 
-    public async Task<League> CreateLeague(CreateLeagueRequest request, int organizerId)
+    public async Task<LeagueCreationResult> CreateLeague(CreateLeagueRequest request, int organizerId)
     {
 
         var league = new League
@@ -54,20 +54,30 @@ class LeagueService : ILeagueService
         _context.Leagues.Add(league);
         _context.SaveChanges();
 
-        var logoTask = request.Logo != null
-        ? _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues")
-        : Task.FromResult<string?>(null);
+        string? uploadWarning = null;
 
-        var coverTask = request.CoverPhoto != null
-            ? _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues")
+        try
+        {
+            var logoTask = request.Logo != null
+            ? _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues")
             : Task.FromResult<string?>(null);
+    
+            var coverTask = request.CoverPhoto != null
+                ? _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues")
+                : Task.FromResult<string?>(null);
+    
+            await Task.WhenAll(logoTask, coverTask);
+    
+            league.Logo = await logoTask;
+            league.CoverPhoto = await coverTask;
+            _context.SaveChanges();
+        }
+        catch (System.Exception)
+        {
+            
+            uploadWarning = "League was created, but the image upload failed. You can try uploading it again later.";
+        }
 
-        await Task.WhenAll(logoTask, coverTask);
-
-        league.Logo = await logoTask;
-        league.CoverPhoto = await coverTask;
-        _context.SaveChanges();
-
-        return league;
+        return new LeagueCreationResult(league, uploadWarning);
     }
 }

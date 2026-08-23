@@ -31,14 +31,21 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             return Unauthorized("User ID could not be found in the token.");
         }
 
-        League league = await _leagueService.CreateLeague(request, organizerId);
+        LeagueCreationResult result = await _leagueService.CreateLeague(request, organizerId);
+        
+        var response = new LeagueResponse(
+            result.League.Id,
+            result.League.Name,
+            result.League.City,
+            result.League.DateTime,
+            result.League.Teams.Select(t => t.Name).ToList()
+        );
 
-        return Ok(new ApiResponse<LeagueResponse>("success", "League created successfully", new LeagueResponse(
-            league.Id,
-            league.Name,
-            league.City,
-            league.DateTime,
-            league.Teams.Select(t => t.Name).ToList()
-        )));
+        return Ok(new ApiResponse<LeagueResponse>(
+            result.UploadWarning == null ? "success" : "warning",
+            result.UploadWarning ?? "League created successfully",
+            response
+        ));
+
     }
 }
