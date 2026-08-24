@@ -26,10 +26,7 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Apply EF Core migrations
-        env:
-          ASPNETCORE_ENVIRONMENT: Production
-          ConnectionStrings__DefaultConnection: ${{ secrets.DB_CONNECTION_STRING }}
-        run: dotnet ef database update
+        run: dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
 
       - name: Publish
         run: dotnet publish -c Release -o ./publish
