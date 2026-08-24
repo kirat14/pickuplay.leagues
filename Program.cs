@@ -2,10 +2,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+
 using Pickuplay.DTOs;
 using Pickuplay.Services;
 using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
+
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
 
@@ -15,20 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 // Add DbContext with SQLite and Mysql
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlite("Data Source=E:\\data\\mydb.db")
-        .LogTo(Console.WriteLine, LogLevel.Information)
-        .EnableSensitiveDataLogging()
-        );
-}
-else
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseMySQL(connectionString));
-}
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseMySQL(connectionString));
 
 // Controllers
 builder.Services.AddControllers()

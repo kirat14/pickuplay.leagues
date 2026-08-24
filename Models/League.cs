@@ -24,8 +24,8 @@ public class League
     public DateTime EndRegistration { get; set; }
 
     public int NbrOfTeams { get; set; }
-    public int MinTeamPlayers { get; set; }
-    public int MaxTeamPlayers { get; set; }
+    public int TeamSize { get; set; }
+    public int NbrOfSubs { get; set; }
 
     public LeagueFormat Format { get; set; }
 
@@ -41,4 +41,8 @@ public class League
     public string? CoverPhoto { get; set; }
 
     public List<Team> Teams { get; set; } = new();
+
+    public bool Referee { get; set; }
+    public bool Prize { get; set; }
+    public bool Pennies { get; set; }
 }

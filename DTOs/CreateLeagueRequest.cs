@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+
 using Pickuplay.Enums;
 
 namespace Pickuplay.DTOs;
@@ -16,13 +17,16 @@ public class CreateLeagueRequest
     [Range(1, int.MaxValue, ErrorMessage = "Number of teams must be at least 1.")]
     public required int NbrOfTeams { get; set; }
     public required List<string> TeamNames { get; set; }
-    public int MinTeamPlayers { get; set; }
-    public int MaxTeamPlayers { get; set; }
+    public int TeamSize { get; set; }
+    public int NbrOfSubs { get; set; }
     public LeagueFormat Format { get; set; }
     public decimal PricePlayer { get; set; }
     public TeamGender Gender { get; set; }
     public int MinimumAge { get; set; }
     public string? Comment { get; set; }
-    public IFormFile? Logo {get; set;}
-    public IFormFile? CoverPhoto {get; set;}
+    public IFormFile? Logo { get; set; }
+    public IFormFile? CoverPhoto { get; set; }
+    public bool Referee { get; set; }
+    public bool Prize { get; set; }
+    public bool Pennies { get; set; }
 }

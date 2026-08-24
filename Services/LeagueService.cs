@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using Pickuplay.DTOs;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.Models;
@@ -31,13 +32,16 @@ class LeagueService : ILeagueService
             StartRegistration = request.StartRegistration,
             EndRegistration = request.EndRegistration,
             NbrOfTeams = request.NbrOfTeams,
-            MinTeamPlayers = request.MinTeamPlayers,
-            MaxTeamPlayers = request.MaxTeamPlayers,
+            TeamSize = request.TeamSize,
+            NbrOfSubs = request.NbrOfSubs,
             Format = request.Format,
             PricePlayer = request.PricePlayer,
             Gender = request.Gender,
             MinimumAge = request.MinimumAge,
-            Comment = request.Comment
+            Comment = request.Comment,
+            Referee = request.Referee,
+            Prize = request.Prize,
+            Pennies = request.Pennies
         };
 
 
@@ -61,20 +65,20 @@ class LeagueService : ILeagueService
             var logoTask = request.Logo != null
             ? _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues")
             : Task.FromResult<string?>(null);
-    
+
             var coverTask = request.CoverPhoto != null
                 ? _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues")
                 : Task.FromResult<string?>(null);
-    
+
             await Task.WhenAll(logoTask, coverTask);
-    
+
             league.Logo = await logoTask;
             league.CoverPhoto = await coverTask;
             _context.SaveChanges();
         }
         catch (System.Exception)
         {
-            
+
             uploadWarning = "League was created, but the image upload failed. You can try uploading it again later.";
         }
 
