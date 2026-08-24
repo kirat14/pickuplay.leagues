@@ -39,6 +39,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "publish/*"
           target: "/var/www/pickuplay-leagues/publish"
+          strip_components: 1
 
       - name: Update production env file
         uses: appleboy/ssh-action@v1
