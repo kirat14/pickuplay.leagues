@@ -11,16 +11,63 @@ using Pickuplay.Teams.Data;
 namespace Pickuplay.Teams.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260822225411_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260831201017_AddLeagueTeamRelationEntities")]
+    partial class AddLeagueTeamRelationEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("LeagueTeamEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("GuestCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsTeam")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("JoinedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeagueId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("PlayerId", "LeagueId")
+                        .IsUnique();
+
+                    b.ToTable("league_team_entries", (string)null);
+                });
 
             modelBuilder.Entity("Pickuplay.Teams.Models.League", b =>
                 {
@@ -30,48 +77,55 @@ namespace Pickuplay.Teams.Migrations
 
                     b.Property<string>("Address")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Comment")
                         .HasColumnType("longtext");
 
                     b.Property<string>("CoverPhoto")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Description")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<DateTime>("EndRegistration")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Format")
-                        .HasColumnType("int");
+                    b.Property<string>("Format")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
 
-                    b.Property<int>("Gender")
-                        .HasColumnType("int");
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
 
                     b.Property<string>("Logo")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
-                    b.Property<int>("MaxTeamPlayers")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MinTeamPlayers")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MinimumAge")
+                    b.Property<int?>("MinimumAge")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("NbrOfSubs")
+                        .HasColumnType("int");
 
                     b.Property<int>("NbrOfTeams")
                         .HasColumnType("int");
@@ -79,8 +133,23 @@ namespace Pickuplay.Teams.Migrations
                     b.Property<int>("OrganizerId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Pennies")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
                     b.Property<decimal>("PricePlayer")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<bool>("Prize")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("Referee")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<long>("SportTypeId")
                         .HasColumnType("bigint");
@@ -88,11 +157,14 @@ namespace Pickuplay.Teams.Migrations
                     b.Property<DateTime>("StartRegistration")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("TeamSize")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SportTypeId");
 
-                    b.ToTable("Leagues");
+                    b.ToTable("leagues", (string)null);
                 });
 
             modelBuilder.Entity("Pickuplay.Teams.Models.SportType", b =>
@@ -140,7 +212,7 @@ namespace Pickuplay.Teams.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("Points")
                         .HasColumnType("int");
@@ -150,9 +222,29 @@ namespace Pickuplay.Teams.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeagueId");
+                    b.HasIndex("LeagueId", "Name")
+                        .IsUnique();
 
-                    b.ToTable("Teams");
+                    b.ToTable("teams", (string)null);
+                });
+
+            modelBuilder.Entity("LeagueTeamEntry", b =>
+                {
+                    b.HasOne("Pickuplay.Teams.Models.League", "League")
+                        .WithMany("Entries")
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pickuplay.Teams.Models.Team", "Team")
+                        .WithMany("Entries")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("League");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Pickuplay.Teams.Models.League", b =>
@@ -179,7 +271,14 @@ namespace Pickuplay.Teams.Migrations
 
             modelBuilder.Entity("Pickuplay.Teams.Models.League", b =>
                 {
+                    b.Navigation("Entries");
+
                     b.Navigation("Teams");
+                });
+
+            modelBuilder.Entity("Pickuplay.Teams.Models.Team", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }
