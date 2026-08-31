@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using Pickuplay.DTOs;
 using Pickuplay.Teams.Data;
+using Pickuplay.Teams.DTOs;
 using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Services;
@@ -83,5 +84,50 @@ class LeagueService : ILeagueService
         }
 
         return new LeagueCreationResult(league, uploadWarning);
+    }
+
+    public async Task<ApiResponse<JoinLeagueResponse?>> JoinLeagueAsync(int leagueId, int playerId, JoinLeagueRequest request)
+    {
+        var team = await _context.Teams
+            .Include(t => t.Entries)
+            .Include(t => t.League)
+            .FirstOrDefaultAsync(t => t.Id == request.TeamId && t.LeagueId == leagueId);
+
+        if (team == null)
+            return new ApiResponse<JoinLeagueResponse?>("error", "Team not found in this league.", null);
+
+        var occupiedSlots = team.Entries.Sum(e => e.IsTeam ? team.League.TeamSize : 1 + e.GuestCount);
+        var requestedSlots = request.IsTeam ? team.League.TeamSize : 1 + request.GuestCount;
+
+        if (occupiedSlots + requestedSlots > team.League.TeamSize)
+            return new ApiResponse<JoinLeagueResponse?>("error", "Not enough space left on this team.", null);
+
+        var entry = new LeagueTeamEntry
+        {
+            TeamId = team.Id,
+            LeagueId = leagueId,
+            PlayerId = playerId,
+            IsTeam = request.IsTeam,
+            GuestCount = request.GuestCount,
+            Status = LeagueTeamEntryStatus.Pending
+        };
+
+        try
+        {
+            _context.LeagueTeamEntries.Add(entry);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("Duplicate entry") == true)
+        {
+            return new ApiResponse<JoinLeagueResponse?>("error", "You have already joined this league.", null);
+        }
+
+        return new ApiResponse<JoinLeagueResponse?>("success", "Join request submitted.", new JoinLeagueResponse(
+            entry.Id,
+            entry.Team.Name,
+            entry.IsTeam,
+            entry.GuestCount,
+            entry.Status.ToString(),
+            entry.JoinedAt));
     }
 }

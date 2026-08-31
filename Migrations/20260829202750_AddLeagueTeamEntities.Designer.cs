@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pickuplay.Teams.Data;
 
@@ -10,9 +11,11 @@ using Pickuplay.Teams.Data;
 namespace Pickuplay.Teams.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260829202750_AddLeagueTeamEntities")]
+    partial class AddLeagueTeamEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -40,9 +43,6 @@ namespace Pickuplay.Teams.Migrations
                         .HasColumnType("datetime(6)")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP(6)");
 
-                    b.Property<int>("LeagueId")
-                        .HasColumnType("int");
-
                     b.Property<int>("PlayerId")
                         .HasColumnType("int");
 
@@ -56,12 +56,7 @@ namespace Pickuplay.Teams.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeagueId");
-
                     b.HasIndex("TeamId");
-
-                    b.HasIndex("PlayerId", "LeagueId")
-                        .IsUnique();
 
                     b.ToTable("league_team_entries", (string)null);
                 });
@@ -227,19 +222,11 @@ namespace Pickuplay.Teams.Migrations
 
             modelBuilder.Entity("LeagueTeamEntry", b =>
                 {
-                    b.HasOne("Pickuplay.Teams.Models.League", "League")
-                        .WithMany("Entries")
-                        .HasForeignKey("LeagueId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Pickuplay.Teams.Models.Team", "Team")
                         .WithMany("Entries")
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("League");
 
                     b.Navigation("Team");
                 });
@@ -268,8 +255,6 @@ namespace Pickuplay.Teams.Migrations
 
             modelBuilder.Entity("Pickuplay.Teams.Models.League", b =>
                 {
-                    b.Navigation("Entries");
-
                     b.Navigation("Teams");
                 });
 

@@ -18,4 +18,6 @@ public class Team
     public int Wins { get; set; }
     public int Losses { get; set; }
     public int Points { get; set; }
+
+    public IList<LeagueTeamEntry> Entries { get; set; } = [];
 }

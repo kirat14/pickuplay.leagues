@@ -33,14 +33,17 @@ public class League
 
     public TeamGender Gender { get; set; }
 
-    public int MinimumAge { get; set; }
+    public int? MinimumAge { get; set; }
 
     public string? Comment { get; set; }
 
     public string? Logo { get; set; }
     public string? CoverPhoto { get; set; }
 
-    public List<Team> Teams { get; set; } = new();
+    public IList<Team> Teams { get; set; } = [];
+
+    public IList<LeagueTeamEntry> Entries { get; set; } = [];
+
 
     public bool Referee { get; set; }
     public bool Prize { get; set; }

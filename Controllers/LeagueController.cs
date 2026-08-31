@@ -1,9 +1,12 @@
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Authorization; // gives us [Authorize] attribute
 using Microsoft.AspNetCore.Mvc;
+
 using Pickuplay.DTOs;
 using Pickuplay.Services;
 using Pickuplay.Teams.Data;
+using Pickuplay.Teams.DTOs;
 using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Teams.Controllers;
@@ -32,7 +35,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
         }
 
         LeagueCreationResult result = await _leagueService.CreateLeague(request, organizerId);
-        
+
         var response = new LeagueResponse(
             result.League.Id,
             result.League.Name,
@@ -47,5 +50,26 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             response
         ));
 
+    }
+
+
+    [HttpPost("{leagueId}/join")]
+    public async Task<IActionResult> JoinLeague(int leagueId, [FromBody] JoinLeagueRequest request)
+    {
+        var userIdClaim = User.FindFirst("id")?.Value;
+
+        if (!int.TryParse(userIdClaim, out var playerId))
+        {
+            return Unauthorized("User ID could not be found in the token.");
+        }
+
+        var result = await _leagueService.JoinLeagueAsync(leagueId, playerId, request);
+
+        return result.type switch
+        {
+            "success" => Ok(result),
+            "error" => BadRequest(result),
+            _ => StatusCode(500, result)
+        };
     }
 }
