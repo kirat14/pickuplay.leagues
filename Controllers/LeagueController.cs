@@ -31,7 +31,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
 
         if (!int.TryParse(userIdClaim, out var organizerId))
         {
-            return Unauthorized("User ID could not be found in the token.");
+            throw new UnauthorizedAccessException("User ID could not be found in the token.");
         }
 
         LeagueCreationResult result = await _leagueService.CreateLeague(request, organizerId);
@@ -60,16 +60,11 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
 
         if (!int.TryParse(userIdClaim, out var playerId))
         {
-            return Unauthorized("User ID could not be found in the token.");
+            throw new UnauthorizedAccessException("User ID could not be found in the token.");
         }
 
         var result = await _leagueService.JoinLeagueAsync(leagueId, playerId, request);
 
-        return result.type switch
-        {
-            "success" => Ok(result),
-            "error" => BadRequest(result),
-            _ => StatusCode(500, result)
-        };
+        return Ok(result);
     }
 }
