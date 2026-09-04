@@ -10,4 +10,7 @@ public interface ILeagueService
      Task<LeagueCreationResult> CreateLeague(CreateLeagueRequest request, int organizerId);
 
      Task<JoinLeagueResponse> JoinLeagueAsync(int leagueId, int playerId, JoinLeagueRequest request);
+
+     Task<LeagueResponse> GetLeague(int id);
+
 }

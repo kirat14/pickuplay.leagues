@@ -41,7 +41,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             result.League.Name,
             result.League.City,
             result.League.DateTime,
-            result.League.Teams.Select(t => t.Name).ToList()
+            result.League.Teams.ToDictionary(t => t.Id, t => t.Name)
         );
 
         return Ok(new ApiResponse<LeagueResponse>(
@@ -50,6 +50,13 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
             response
         ));
 
+    }
+
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetLeague([FromRoute] int id)
+    {
+        return Ok(await _leagueService.GetLeague(id));
     }
 
 

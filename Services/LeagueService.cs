@@ -87,6 +87,32 @@ class LeagueService : ILeagueService
         return new LeagueCreationResult(league, uploadWarning);
     }
 
+    public async Task<LeagueResponse> GetLeague(int id)
+    {
+        var rawData = await _context.Leagues
+            .Where(l => l.Id == id)
+            .Select(l => new
+            {
+                l.Id,
+                l.Name,
+                l.City,
+                l.DateTime,
+                Teams = l.Teams.Select(t => new { t.Id, t.Name }).ToList()
+            })
+            .FirstOrDefaultAsync();
+
+        if (rawData == null)
+            throw new LeagueNotFoundException();
+
+        return new LeagueResponse(
+            rawData.Id,
+            rawData.Name,
+            rawData.City,
+            rawData.DateTime,
+            rawData.Teams.ToDictionary(t => t.Id, t => t.Name)
+        );
+    }
+
     public async Task<JoinLeagueResponse> JoinLeagueAsync(int leagueId, int playerId, JoinLeagueRequest request)
     {
         var team = await _context.Teams

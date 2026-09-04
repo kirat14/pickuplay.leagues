@@ -5,5 +5,5 @@ public record LeagueResponse(
     string Name,
     string City,
     DateTime DateTime,
-    List<string> TeamNames
+    IDictionary<int, string> Teams
 );
