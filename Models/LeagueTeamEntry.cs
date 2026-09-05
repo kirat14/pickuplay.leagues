@@ -14,6 +14,8 @@ public class LeagueTeamEntry
     public bool IsTeam { get; set; } = false;      // true = paid for entire team slot
     public int GuestCount { get; set; } = 0;        // guests this player is paying for
 
+    public string? Comment { get; set; }
+
     public LeagueTeamEntryStatus Status { get; set; } = LeagueTeamEntryStatus.Pending;
 
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;

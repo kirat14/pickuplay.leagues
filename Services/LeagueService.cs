@@ -129,6 +129,7 @@ class LeagueService : ILeagueService
             PlayerId = playerId,
             IsTeam = request.IsTeam,
             GuestCount = request.GuestCount,
+            Comment = request.Comment,
             Status = LeagueTeamEntryStatus.Pending
         };
 
@@ -147,6 +148,7 @@ class LeagueService : ILeagueService
             entry.Team.Name,
             entry.IsTeam,
             entry.GuestCount,
+            entry.Comment,
             entry.Status.ToString(),
             entry.JoinedAt);
     }
