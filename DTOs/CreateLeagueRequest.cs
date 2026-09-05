@@ -10,7 +10,7 @@ public class CreateLeagueRequest
     public required long SportTypeId { get; set; }
     public required string City { get; set; }
     public required string Address { get; set; }
-    public required DateTime DateTime { get; set; }
+    public required DateTime StartDate { get; set; }
     public string? Description { get; set; }
     public required DateTime StartRegistration { get; set; }
     public required DateTime EndRegistration { get; set; }

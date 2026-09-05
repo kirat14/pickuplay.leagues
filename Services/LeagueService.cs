@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using Pickuplay.DTOs;
+using Pickuplay.Mappers;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.DTOs;
 using Pickuplay.Teams.Exceptions;
@@ -29,7 +30,7 @@ class LeagueService : ILeagueService
             SportTypeId = request.SportTypeId,
             City = request.City,
             Address = request.Address,
-            DateTime = request.DateTime,
+            StartDate = request.StartDate,
             Description = request.Description,
             StartRegistration = request.StartRegistration,
             EndRegistration = request.EndRegistration,
@@ -60,6 +61,9 @@ class LeagueService : ILeagueService
         _context.Leagues.Add(league);
         _context.SaveChanges();
 
+        league = await _context.Leagues
+        .FirstAsync(l => l.Id == league.Id);
+
         string? uploadWarning = null;
 
         try
@@ -89,28 +93,13 @@ class LeagueService : ILeagueService
 
     public async Task<LeagueResponse> GetLeague(int id)
     {
-        var rawData = await _context.Leagues
-            .Where(l => l.Id == id)
-            .Select(l => new
-            {
-                l.Id,
-                l.Name,
-                l.City,
-                l.DateTime,
-                Teams = l.Teams.Select(t => new { t.Id, t.Name }).ToList()
-            })
-            .FirstOrDefaultAsync();
+        var league = await _context.Leagues
+        .FirstOrDefaultAsync(l => l.Id == id);
 
-        if (rawData == null)
+        if (league == null)
             throw new LeagueNotFoundException();
 
-        return new LeagueResponse(
-            rawData.Id,
-            rawData.Name,
-            rawData.City,
-            rawData.DateTime,
-            rawData.Teams.ToDictionary(t => t.Id, t => t.Name)
-        );
+        return league.ToResponse();
     }
 
     public async Task<JoinLeagueResponse> JoinLeagueAsync(int leagueId, int playerId, JoinLeagueRequest request)

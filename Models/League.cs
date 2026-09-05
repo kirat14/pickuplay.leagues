@@ -11,12 +11,12 @@ public class League
     public required string Name { get; set; }
 
     public long SportTypeId { get; set; }
-    public SportType? SportType { get; set; }
+    public SportType SportType { get; set; } = null!;
 
     public required string City { get; set; }
     public required string Address { get; set; }
 
-    public DateTime DateTime { get; set; }
+    public DateTime StartDate { get; set; }
 
     public string? Description { get; set; }
 

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization; // gives us [Authorize] attribute
 using Microsoft.AspNetCore.Mvc;
 
 using Pickuplay.DTOs;
+using Pickuplay.Mappers;
 using Pickuplay.Services;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.DTOs;
@@ -25,7 +26,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
     [HttpPost]                     // maps HTTP POST requests to this method
     [Authorize(Roles = "ADMIN, ORGANIZER")]                    // requires a valid JWT token to access this endpoint
     [Consumes("multipart/form-data")]
-    public async Task<IActionResult> CreateTeam([FromForm] CreateLeagueRequest request)
+    public async Task<IActionResult> CreateLeague([FromForm] CreateLeagueRequest request)
     {
         var userIdClaim = User.FindFirst("id")?.Value;
 
@@ -36,18 +37,12 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
 
         LeagueCreationResult result = await _leagueService.CreateLeague(request, organizerId);
 
-        var response = new LeagueResponse(
-            result.League.Id,
-            result.League.Name,
-            result.League.City,
-            result.League.DateTime,
-            result.League.Teams.ToDictionary(t => t.Id, t => t.Name)
-        );
+
 
         return Ok(new ApiResponse<LeagueResponse>(
             result.UploadWarning == null ? "success" : "warning",
             result.UploadWarning ?? "League created successfully",
-            response
+            result.League.ToResponse()
         ));
 
     }

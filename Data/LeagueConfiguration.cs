@@ -26,7 +26,7 @@ public class LeagueConfiguration : IEntityTypeConfiguration<League>
         builder.Property(l => l.Description)
             .HasMaxLength(2000);
 
-        builder.Property(l => l.DateTime)
+        builder.Property(l => l.StartDate)
             .IsRequired();
 
         builder.Property(l => l.StartRegistration)
@@ -93,5 +93,8 @@ public class LeagueConfiguration : IEntityTypeConfiguration<League>
         builder.HasOne(l => l.SportType)
         .WithMany()
         .HasForeignKey(l => l.SportTypeId);
+
+        builder.Navigation(l => l.SportType)
+        .AutoInclude();
     }
 }
