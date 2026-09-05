@@ -26,6 +26,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             TeamFullException ex => (StatusCodes.Status409Conflict, ex.Message),
             TeamNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             LeagueNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
+            LeagueRegistrationPeriodException ex => (StatusCodes.Status409Conflict, ex.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
 

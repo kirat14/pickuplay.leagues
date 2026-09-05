@@ -111,6 +111,11 @@ class LeagueService : ILeagueService
 
         if (team == null)
             throw new TeamNotFoundException();
+
+        DateTime now = DateTime.Now;
+        if (now > team.League.EndRegistration || now < team.League.StartRegistration)
+            throw new LeagueRegistrationPeriodException();
+
         var occupiedSlots = team.Entries.Sum(e => e.IsTeam ? team.League.TeamSize : 1 + e.GuestCount);
         var requestedSlots = request.IsTeam ? team.League.TeamSize : 1 + request.GuestCount;
 
