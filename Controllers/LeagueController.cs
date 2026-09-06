@@ -72,6 +72,7 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
     }
 
     [HttpPatch("~/api/league-entries/{entryId}")]
+    [Authorize(Roles = "ADMIN, ORGANIZER")]
     public async Task<IActionResult> UpdateEntryStatus([FromRoute] int entryId, [FromQuery] LeagueTeamEntryStatus status)
     {
         var league_entry = await _leagueService.UpdateEntryStatus(entryId, status);
