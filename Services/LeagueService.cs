@@ -4,6 +4,7 @@ using Pickuplay.DTOs;
 using Pickuplay.Mappers;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.DTOs;
+using Pickuplay.Teams.Enums;
 using Pickuplay.Teams.Exceptions;
 using Pickuplay.Teams.Models;
 
@@ -151,5 +152,21 @@ class LeagueService : ILeagueService
             entry.Comment,
             entry.Status.ToString(),
             entry.JoinedAt);
+    }
+
+    public async Task<LeagueTeamEntry> UpdateEntryStatus(int entryId, LeagueTeamEntryStatus status)
+    {
+        var league_entry = await _context.LeagueTeamEntries
+            .FirstOrDefaultAsync(e => e.Id == entryId);
+
+        if (league_entry == null)
+        {
+            throw new LeagueTeamEntryNotFoundException();
+        }
+
+        league_entry.Status = status;
+        await _context.SaveChangesAsync();
+
+        return league_entry;
     }
 }

@@ -1,3 +1,4 @@
+using Pickuplay.Teams.Enums;
 using Pickuplay.Teams.Models;
 
 public class LeagueTeamEntry
@@ -19,10 +20,4 @@ public class LeagueTeamEntry
     public LeagueTeamEntryStatus Status { get; set; } = LeagueTeamEntryStatus.Pending;
 
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
-}
-
-public enum LeagueTeamEntryStatus
-{
-    Pending,
-    Confirmed
 }

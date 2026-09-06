@@ -8,6 +8,7 @@ using Pickuplay.Mappers;
 using Pickuplay.Services;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.DTOs;
+using Pickuplay.Teams.Enums;
 using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Teams.Controllers;
@@ -68,5 +69,12 @@ public class LeagueController : ControllerBase  // gives us Ok(), NotFound(), et
         var result = await _leagueService.JoinLeagueAsync(leagueId, playerId, request);
 
         return Ok(result);
+    }
+
+    [HttpPatch("~/api/league-entries/{entryId}")]
+    public async Task<IActionResult> UpdateEntryStatus([FromRoute] int entryId, [FromQuery] LeagueTeamEntryStatus status)
+    {
+        var league_entry = await _leagueService.UpdateEntryStatus(entryId, status);
+        return Ok(new ApiResponse<LeagueTeamEntry>("success", "The status has been updated successfully", league_entry));
     }
 }
