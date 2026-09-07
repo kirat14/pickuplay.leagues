@@ -2,7 +2,7 @@ using Pickuplay.Enums;
 
 namespace Pickuplay.Teams.Models;
 
-public class League
+public class Competition
 {
     public int Id { get; set; }
 
@@ -27,7 +27,7 @@ public class League
     public int TeamSize { get; set; }
     public int NbrOfSubs { get; set; }
 
-    public LeagueFormat Format { get; set; }
+    public CompetitionFormat Format { get; set; }
 
     public decimal PricePlayer { get; set; }
 
@@ -42,7 +42,7 @@ public class League
 
     public IList<Team> Teams { get; set; } = [];
 
-    public IList<LeagueTeamEntry> Entries { get; set; } = [];
+    public IList<CompetitionTeamEntry> Entries { get; set; } = [];
 
 
     public bool Referee { get; set; }

@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "publish/*"
-          target: "/var/www/pickuplay-leagues/publish"
+          target: "/var/www/pickuplay-competitions/publish"
           strip_components: 1
 
       - name: Update production env file

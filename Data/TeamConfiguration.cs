@@ -13,15 +13,15 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
 
         builder.HasKey(t => t.Id);
 
-        builder.HasOne(t => t.League)
+        builder.HasOne(t => t.Competition)
         .WithMany(l => l.Teams)
-        .HasForeignKey(t => t.LeagueId)
+        .HasForeignKey(t => t.CompetitionId)
         .OnDelete(DeleteBehavior.Cascade);
 
         builder.Property(t => t.Name)
         .IsRequired();
 
-        builder.HasIndex(t => new { t.LeagueId, t.Name })
+        builder.HasIndex(t => new { t.CompetitionId, t.Name })
         .IsUnique();
 
     }

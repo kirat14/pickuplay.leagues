@@ -5,11 +5,11 @@ using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Teams.Data;
 
-public class LeagueConfiguration : IEntityTypeConfiguration<League>
+public class CompetitionConfiguration : IEntityTypeConfiguration<Competition>
 {
-    public void Configure(EntityTypeBuilder<League> builder)
+    public void Configure(EntityTypeBuilder<Competition> builder)
     {
-        builder.ToTable("leagues");
+        builder.ToTable("competitions");
 
         builder.HasKey(l => l.Id);
 
@@ -86,8 +86,8 @@ public class LeagueConfiguration : IEntityTypeConfiguration<League>
             .HasDefaultValue(false);
 
         builder.HasMany(l => l.Teams)
-            .WithOne(t => t.League)
-            .HasForeignKey(t => t.LeagueId)
+            .WithOne(t => t.Competition)
+            .HasForeignKey(t => t.CompetitionId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(l => l.SportType)

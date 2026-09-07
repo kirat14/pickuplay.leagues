@@ -9,10 +9,10 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
 
-    public DbSet<League> Leagues { get; set; }
+    public DbSet<Competition> Competition { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<SportType> SportTypes { get; set; }
-    public DbSet<LeagueTeamEntry> LeagueTeamEntries { get; set; }
+    public DbSet<CompetitionTeamEntry> CompetitionTeamEntries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

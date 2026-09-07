@@ -22,12 +22,12 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
 
             UnauthorizedAccessException ex => (StatusCodes.Status401Unauthorized, ex.Message),
-            AlreadyJoinedLeagueException ex => (StatusCodes.Status409Conflict, ex.Message),
+            AlreadyJoinedCompetitionException ex => (StatusCodes.Status409Conflict, ex.Message),
             TeamFullException ex => (StatusCodes.Status409Conflict, ex.Message),
             TeamNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
-            LeagueNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
-            LeagueTeamEntryNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
-            LeagueRegistrationPeriodException ex => (StatusCodes.Status409Conflict, ex.Message),
+            CompetitionNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
+            CompetitionTeamEntryNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
+            CompetitionRegistrationPeriodException ex => (StatusCodes.Status409Conflict, ex.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
 

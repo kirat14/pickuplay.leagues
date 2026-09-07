@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
+
 using Pickuplay.Teams.Models;
 
 namespace Pickuplay.DTOs;
 
-public record LeagueCreationResult([Required] League League, string? UploadWarning);
+public record CompetitionCreationResult([Required] Competition Competition, string? UploadWarning);

@@ -1,14 +1,14 @@
 using Pickuplay.Teams.Enums;
 using Pickuplay.Teams.Models;
 
-public class LeagueTeamEntry
+public class CompetitionTeamEntry
 {
     public int Id { get; set; }
 
     public int TeamId { get; set; }
     public Team Team { get; set; } = null!;
-    public int LeagueId { get; set; }
-    public League League { get; set; } = null!;
+    public int CompetitionId { get; set; }
+    public Competition Competition { get; set; } = null!;
 
     public int PlayerId { get; set; }
 
@@ -17,7 +17,7 @@ public class LeagueTeamEntry
 
     public string? Comment { get; set; }
 
-    public LeagueTeamEntryStatus Status { get; set; } = LeagueTeamEntryStatus.Pending;
+    public CompetitionTeamEntryStatus Status { get; set; } = CompetitionTeamEntryStatus.Pending;
 
     public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
 }

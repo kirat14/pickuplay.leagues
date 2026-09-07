@@ -1,6 +1,6 @@
 namespace Pickuplay.Enums;
 
-public enum LeagueFormat
+public enum CompetitionFormat
 {
     RoundRobin,
     DoubleRoundRobin,

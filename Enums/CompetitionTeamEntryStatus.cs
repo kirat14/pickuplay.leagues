@@ -1,6 +1,6 @@
 namespace Pickuplay.Teams.Enums;
 
-public enum LeagueTeamEntryStatus
+public enum CompetitionTeamEntryStatus
 {
     Pending,
     Confirmed

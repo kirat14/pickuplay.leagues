@@ -4,8 +4,8 @@ public class Team
 {
     public int Id { get; set; }
 
-    public int LeagueId { get; set; }
-    public League League { get; set; } = null!;
+    public int CompetitionId { get; set; }
+    public Competition Competition { get; set; } = null!;
 
     public required string Name { get; set; }
 
@@ -19,5 +19,5 @@ public class Team
     public int Losses { get; set; }
     public int Points { get; set; }
 
-    public IList<LeagueTeamEntry> Entries { get; set; } = [];
+    public IList<CompetitionTeamEntry> Entries { get; set; } = [];
 }

@@ -4,7 +4,7 @@ using Pickuplay.Enums;
 
 namespace Pickuplay.DTOs;
 
-public class CreateLeagueRequest
+public class CreateCompetitionRequest
 {
     public required string Name { get; set; }
     public required long SportTypeId { get; set; }
@@ -19,7 +19,7 @@ public class CreateLeagueRequest
     public required List<string> TeamNames { get; set; }
     public int TeamSize { get; set; }
     public int NbrOfSubs { get; set; }
-    public LeagueFormat Format { get; set; }
+    public CompetitionFormat Format { get; set; }
     public decimal PricePlayer { get; set; }
     public TeamGender Gender { get; set; }
     public int MinimumAge { get; set; }

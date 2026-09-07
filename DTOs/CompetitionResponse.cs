@@ -1,6 +1,6 @@
 namespace Pickuplay.DTOs;
 
-public record LeagueResponse(
+public record CompetitionResponse(
     int Id,
     int OrganizerId,
     string Name,

@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Pickuplay.Teams.Data;
 
-public class LeagueTeamEntryConfiguration : IEntityTypeConfiguration<LeagueTeamEntry>
+public class CompetitionTeamEntryConfiguration : IEntityTypeConfiguration<CompetitionTeamEntry>
 {
-    public void Configure(EntityTypeBuilder<LeagueTeamEntry> builder)
+    public void Configure(EntityTypeBuilder<CompetitionTeamEntry> builder)
     {
-        builder.ToTable("league_team_entries");
+        builder.ToTable("competition_team_entries");
 
         builder.HasKey(e => e.Id);
 
@@ -30,12 +30,12 @@ public class LeagueTeamEntryConfiguration : IEntityTypeConfiguration<LeagueTeamE
             .HasForeignKey(e => e.TeamId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasOne(e => e.League)
+        builder.HasOne(e => e.Competition)
             .WithMany(l => l.Entries)
-            .HasForeignKey(e => e.LeagueId)
+            .HasForeignKey(e => e.CompetitionId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(e => new { e.PlayerId, e.LeagueId })
+        builder.HasIndex(e => new { e.PlayerId, e.CompetitionId })
         .IsUnique();
     }
 }

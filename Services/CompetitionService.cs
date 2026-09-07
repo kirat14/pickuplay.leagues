@@ -10,21 +10,21 @@ using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Services;
 
-class LeagueService : ILeagueService
+class CompetitionService : ICompetitionService
 {
     private readonly AppDbContext _context;
     private readonly IStorageService _storageService;
 
-    public LeagueService(AppDbContext context, IStorageService storageService)
+    public CompetitionService(AppDbContext context, IStorageService storageService)
     {
         _context = context;
         _storageService = storageService;
     }
 
-    public async Task<LeagueCreationResult> CreateLeague(CreateLeagueRequest request, int organizerId)
+    public async Task<CompetitionCreationResult> CreateCompetition(CreateCompetitionRequest request, int organizerId)
     {
 
-        var league = new League
+        var competition = new Competition
         {
             OrganizerId = organizerId,
             Name = request.Name,
@@ -53,98 +53,99 @@ class LeagueService : ILeagueService
         {
             var teamName = i < request.TeamNames.Count ? request.TeamNames[i] : $"Team {i + 1}";
 
-            league.Teams.Add(new Team
+            competition.Teams.Add(new Team
             {
                 Name = teamName
             });
         }
 
-        _context.Leagues.Add(league);
+        _context.Competition.Add(competition);
         _context.SaveChanges();
 
-        league = await _context.Leagues
-        .FirstAsync(l => l.Id == league.Id);
+        competition = await _context.Competition
+        .FirstAsync(l => l.Id == competition.Id);
 
         string? uploadWarning = null;
 
         try
         {
             var logoTask = request.Logo != null
-            ? _storageService.SaveFile(request.Logo, $"logo_{league.Id}", "leagues")
+            ? _storageService.SaveFile(request.Logo, $"logo_{competition.Id}", "competitions")
             : Task.FromResult<string?>(null);
 
             var coverTask = request.CoverPhoto != null
-                ? _storageService.SaveFile(request.CoverPhoto, $"cover_{league.Id}", "leagues")
+                ? _storageService.SaveFile(request.CoverPhoto, $"cover_{competition.Id}", "competitions")
                 : Task.FromResult<string?>(null);
 
             await Task.WhenAll(logoTask, coverTask);
 
-            league.Logo = await logoTask;
-            league.CoverPhoto = await coverTask;
+            competition.Logo = await logoTask;
+            competition.CoverPhoto = await coverTask;
             _context.SaveChanges();
         }
         catch (System.Exception)
         {
 
-            uploadWarning = "League was created, but the image upload failed. You can try uploading it again later.";
+            uploadWarning = "Competition was created, but the image upload failed. You can try uploading it again later.";
         }
 
-        return new LeagueCreationResult(league, uploadWarning);
+        return new CompetitionCreationResult(competition, uploadWarning);
     }
 
-    public async Task<LeagueResponse> GetLeague(int id)
+    public async Task<CompetitionResponse> GetCompetition(int id)
     {
-        var league = await _context.Leagues
+        var competition = await _context.Competition
+        .Include(c => c.Teams)
         .FirstOrDefaultAsync(l => l.Id == id);
 
-        if (league == null)
-            throw new LeagueNotFoundException();
+        if (competition == null)
+            throw new CompetitionNotFoundException();
 
-        return league.ToResponse();
+        return competition.ToResponse();
     }
 
-    public async Task<JoinLeagueResponse> JoinLeagueAsync(int leagueId, int playerId, JoinLeagueRequest request)
+    public async Task<JoinCompetitionResponse> JoinCompetitionAsync(int competitionId, int playerId, JoinCompetitionRequest request)
     {
         var team = await _context.Teams
             .Include(t => t.Entries)
-            .Include(t => t.League)
-            .FirstOrDefaultAsync(t => t.Id == request.TeamId && t.LeagueId == leagueId);
+            .Include(t => t.Competition)
+            .FirstOrDefaultAsync(t => t.Id == request.TeamId && t.CompetitionId == competitionId);
 
         if (team == null)
             throw new TeamNotFoundException();
 
         DateTime now = DateTime.Now;
-        if (now > team.League.EndRegistration || now < team.League.StartRegistration)
-            throw new LeagueRegistrationPeriodException();
+        if (now > team.Competition.EndRegistration || now < team.Competition.StartRegistration)
+            throw new CompetitionRegistrationPeriodException();
 
-        var occupiedSlots = team.Entries.Sum(e => e.IsTeam ? team.League.TeamSize : 1 + e.GuestCount);
-        var requestedSlots = request.IsTeam ? team.League.TeamSize : 1 + request.GuestCount;
+        var occupiedSlots = team.Entries.Sum(e => e.IsTeam ? team.Competition.TeamSize : 1 + e.GuestCount);
+        var requestedSlots = request.IsTeam ? team.Competition.TeamSize : 1 + request.GuestCount;
 
-        if (occupiedSlots + requestedSlots > team.League.TeamSize)
+        if (occupiedSlots + requestedSlots > team.Competition.TeamSize)
             throw new TeamFullException();
 
-        var entry = new LeagueTeamEntry
+        var entry = new CompetitionTeamEntry
         {
             TeamId = team.Id,
-            LeagueId = leagueId,
+            CompetitionId = competitionId,
             PlayerId = playerId,
             IsTeam = request.IsTeam,
             GuestCount = request.GuestCount,
             Comment = request.Comment,
-            Status = LeagueTeamEntryStatus.Pending
+            Status = CompetitionTeamEntryStatus.Pending
         };
 
         try
         {
-            _context.LeagueTeamEntries.Add(entry);
+            _context.CompetitionTeamEntries.Add(entry);
             await _context.SaveChangesAsync();
         }
         catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("Duplicate entry") == true)
         {
-            throw new AlreadyJoinedLeagueException();
+            throw new AlreadyJoinedCompetitionException();
         }
 
-        return new JoinLeagueResponse(
+        return new JoinCompetitionResponse(
             entry.Id,
             entry.Team.Name,
             entry.IsTeam,
@@ -154,19 +155,19 @@ class LeagueService : ILeagueService
             entry.JoinedAt);
     }
 
-    public async Task<LeagueTeamEntry> UpdateEntryStatus(int entryId, LeagueTeamEntryStatus status)
+    public async Task<CompetitionTeamEntry> UpdateEntryStatus(int entryId, CompetitionTeamEntryStatus status)
     {
-        var league_entry = await _context.LeagueTeamEntries
+        var competition_entry = await _context.CompetitionTeamEntries
             .FirstOrDefaultAsync(e => e.Id == entryId);
 
-        if (league_entry == null)
+        if (competition_entry == null)
         {
-            throw new LeagueTeamEntryNotFoundException();
+            throw new CompetitionTeamEntryNotFoundException();
         }
 
-        league_entry.Status = status;
+        competition_entry.Status = status;
         await _context.SaveChangesAsync();
 
-        return league_entry;
+        return competition_entry;
     }
 }
