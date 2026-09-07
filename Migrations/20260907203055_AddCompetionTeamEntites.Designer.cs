@@ -11,8 +11,8 @@ using Pickuplay.Teams.Data;
 namespace Pickuplay.Teams.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260907180821_UpdateLeagueToCompetitionName")]
-    partial class UpdateLeagueToCompetitionName
+    [Migration("20260907203055_AddCompetionTeamEntites")]
+    partial class AddCompetionTeamEntites
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
