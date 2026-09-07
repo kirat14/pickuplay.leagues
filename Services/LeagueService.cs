@@ -95,6 +95,7 @@ class LeagueService : ILeagueService
     public async Task<LeagueResponse> GetLeague(int id)
     {
         var league = await _context.Leagues
+        .Include(l => l.Teams)
         .FirstOrDefaultAsync(l => l.Id == id);
 
         if (league == null)
