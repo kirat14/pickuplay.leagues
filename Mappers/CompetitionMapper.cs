@@ -32,7 +32,8 @@ public static class CompetitionMapper
             Teams: competition.Teams.ToDictionary(
                 team => team.Id,
                 team => team.Name
-            )
+            ),
+            TeamCount: competition.Teams.Count
         );
     }
 }

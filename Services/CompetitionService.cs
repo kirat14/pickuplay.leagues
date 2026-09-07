@@ -59,10 +59,10 @@ class CompetitionService : ICompetitionService
             });
         }
 
-        _context.Competition.Add(competition);
+        _context.Competitions.Add(competition);
         _context.SaveChanges();
 
-        competition = await _context.Competition
+        competition = await _context.Competitions
         .FirstAsync(l => l.Id == competition.Id);
 
         string? uploadWarning = null;
@@ -94,7 +94,7 @@ class CompetitionService : ICompetitionService
 
     public async Task<CompetitionResponse> GetCompetition(int id)
     {
-        var competition = await _context.Competition
+        var competition = await _context.Competitions
         .Include(c => c.Teams)
         .FirstOrDefaultAsync(l => l.Id == id);
 
@@ -102,6 +102,30 @@ class CompetitionService : ICompetitionService
             throw new CompetitionNotFoundException();
 
         return competition.ToResponse();
+    }
+
+    public async Task<PagedResponse<CompetitionResponse>> GetCompetitions(int page, int pageSize)
+    {
+        var totalElements = await _context.Competitions.CountAsync();
+
+        var leagues = await _context.Competitions
+        .Include(c => c.Teams)
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+
+        var totalPages = (int)Math.Ceiling(totalElements / (double)pageSize);
+
+        return new PagedResponse<CompetitionResponse>
+        {
+            Content = leagues.Select(l => l.ToResponse()).ToList(),
+            CurrentPage = page,
+            TotalPages = totalPages,
+            TotalElements = totalElements,
+            HasNext = page < totalPages,
+            HasPrevious = page > 1
+        };
+
     }
 
     public async Task<JoinCompetitionResponse> JoinCompetitionAsync(int competitionId, int playerId, JoinCompetitionRequest request)

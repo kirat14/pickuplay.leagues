@@ -2,7 +2,6 @@
 using Pickuplay.DTOs;
 using Pickuplay.Teams.DTOs;
 using Pickuplay.Teams.Enums;
-using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Services;
 
@@ -14,5 +13,8 @@ public interface ICompetitionService
 
      Task<CompetitionResponse> GetCompetition(int id);
      Task<CompetitionTeamEntry> UpdateEntryStatus(int entryId, CompetitionTeamEntryStatus status);
+
+     Task<PagedResponse<CompetitionResponse>> GetCompetitions(int page, int pageSize);
+
 
 }

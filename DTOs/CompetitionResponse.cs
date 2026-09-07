@@ -22,5 +22,6 @@ public record CompetitionResponse(
     bool Referee,
     bool Prize,
     bool Pennies,
-    IDictionary<int, string> Teams
+    IDictionary<int, string> Teams,
+    int TeamCount
 );

@@ -78,4 +78,12 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
         var competition_entry = await _competitionService.UpdateEntryStatus(entryId, status);
         return Ok(new ApiResponse<CompetitionTeamEntry>("success", "The status has been updated successfully", competition_entry));
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetLeagues([FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
+    {
+        var competitions = await _competitionService.GetCompetitions(page, pageSize);
+        return Ok(new ApiResponse<PagedResponse<CompetitionResponse>>("success", "Leagues retrived successfully", competitions));
+    }
 }

@@ -9,7 +9,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options) { }
 
-    public DbSet<Competition> Competition { get; set; }
+    public DbSet<Competition> Competitions { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<SportType> SportTypes { get; set; }
     public DbSet<CompetitionTeamEntry> CompetitionTeamEntries { get; set; }
