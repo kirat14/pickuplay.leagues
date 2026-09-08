@@ -35,6 +35,10 @@ public class CompetitionTeamEntryConfiguration : IEntityTypeConfiguration<Compet
             .HasForeignKey(e => e.CompetitionId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(e => e.Player)
+        .WithMany()
+        .HasForeignKey(e => e.PlayerId);
+
         builder.HasIndex(e => new { e.PlayerId, e.CompetitionId })
         .IsUnique();
     }

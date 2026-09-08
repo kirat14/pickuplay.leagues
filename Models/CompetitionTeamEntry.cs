@@ -10,7 +10,8 @@ public class CompetitionTeamEntry
     public int CompetitionId { get; set; }
     public Competition Competition { get; set; } = null!;
 
-    public int PlayerId { get; set; }
+    public long PlayerId { get; set; }
+    public Player Player { get; set; } = null!;
 
     public bool IsTeam { get; set; } = false;      // true = paid for entire team slot
     public int GuestCount { get; set; } = 0;        // guests this player is paying for
