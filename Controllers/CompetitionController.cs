@@ -52,7 +52,8 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCompetition([FromRoute] int id)
     {
-        return Ok(await _competitionService.GetCompetition(id));
+        var competition = await _competitionService.GetCompetition(id);
+        return Ok(new ApiResponse<CompetitionResponse>("success", "Competition retrived successfully.", competition));
     }
 
 
