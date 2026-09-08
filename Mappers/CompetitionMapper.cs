@@ -33,7 +33,8 @@ public static class CompetitionMapper
                 team => team.Id,
                 team => team.Name
             ),
-            TeamCount: competition.Teams.Count
+            TeamCount: competition.Teams.Count,
+            AvailableSpots: ((competition.TeamSize + competition.NbrOfSubs) * competition.NbrOfTeams) - (competition.Entries.Count + competition.Entries.Sum(e => e.GuestCount))
         );
     }
 }

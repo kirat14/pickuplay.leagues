@@ -96,6 +96,7 @@ class CompetitionService : ICompetitionService
     {
         var competition = await _context.Competitions
         .Include(c => c.Teams)
+        .Include(c => c.Entries)
         .FirstOrDefaultAsync(l => l.Id == id);
 
         if (competition == null)
@@ -110,6 +111,7 @@ class CompetitionService : ICompetitionService
 
         var leagues = await _context.Competitions
         .Include(c => c.Teams)
+        .Include(c => c.Entries)
         .Skip((page - 1) * pageSize)
         .Take(pageSize)
         .ToListAsync();
