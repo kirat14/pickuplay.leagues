@@ -1,3 +1,6 @@
+using Pickuplay.Teams.DTOs;
+using Pickuplay.Teams.Models;
+
 namespace Pickuplay.DTOs;
 
 public record CompetitionResponse(
@@ -22,7 +25,7 @@ public record CompetitionResponse(
     bool Referee,
     bool Prize,
     bool Pennies,
-    IDictionary<int, string> Teams,
+    IList<TeamResponse> Teams,
     int TeamCount,
     int AvailableSpots
 );

@@ -1,4 +1,5 @@
 using Pickuplay.DTOs;
+using Pickuplay.Teams.DTOs;
 using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Mappers;
@@ -29,10 +30,18 @@ public static class CompetitionMapper
             Referee: competition.Referee,
             Prize: competition.Prize,
             Pennies: competition.Pennies,
-            Teams: competition.Teams.ToDictionary(
-                team => team.Id,
-                team => team.Name
-            ),
+            Teams: competition.Teams.Select(t => new TeamResponse(
+                t.Id,
+                t.CompetitionId,
+                t.Name,
+                t.CaptainId,
+                t.Logo,
+                t.Color,
+                t.Wins,
+                t.Losses,
+                t.Points,
+                t.Entries.Count + t.Entries.Sum(e => e.GuestCount)
+            )).ToList(),
             TeamCount: competition.Teams.Count,
             AvailableSpots: ((competition.TeamSize + competition.NbrOfSubs) * competition.NbrOfTeams) - (competition.Entries.Count + competition.Entries.Sum(e => e.GuestCount))
         );

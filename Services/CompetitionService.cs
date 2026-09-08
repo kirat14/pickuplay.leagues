@@ -97,6 +97,7 @@ class CompetitionService : ICompetitionService
         var competition = await _context.Competitions
         .Include(c => c.Teams)
         .Include(c => c.Entries)
+        .ThenInclude(e => e.Player)
         .FirstOrDefaultAsync(l => l.Id == id);
 
         if (competition == null)
