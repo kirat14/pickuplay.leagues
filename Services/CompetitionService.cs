@@ -197,4 +197,16 @@ class CompetitionService : ICompetitionService
 
         return competition_entry;
     }
+
+    public async Task<List<CompetitionTeamEntryResponse>> GetEntries(int organizerId, CompetitionTeamEntryStatus entryStatus)
+    {
+
+        var competitionTeamEntries = await _context.CompetitionTeamEntries
+        .Include(e => e.Player)
+        .Include(e => e.Team)
+        .Where(e => e.Competition.OrganizerId == organizerId && e.Status == entryStatus)
+        .ToListAsync();
+
+        return competitionTeamEntries.Select(e => e.ToResponse()).ToList();
+    }
 }

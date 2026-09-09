@@ -21,6 +21,7 @@ public class PlayerConfiguration : IEntityTypeConfiguration<Player>
             .HasColumnName("last_name");
 
         builder.Property(p => p.SkillLevel)
-            .HasColumnName("skill_level");
+            .HasColumnName("skill_level")
+            .IsRequired(false);
     }
 }

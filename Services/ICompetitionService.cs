@@ -15,6 +15,7 @@ public interface ICompetitionService
      Task<CompetitionTeamEntry> UpdateEntryStatus(int entryId, CompetitionTeamEntryStatus status);
 
      Task<PagedResponse<CompetitionResponse>> GetCompetitions(int page, int pageSize);
+     Task<List<CompetitionTeamEntryResponse>> GetEntries(int organizerId, CompetitionTeamEntryStatus entryStatus);
 
 
 }
