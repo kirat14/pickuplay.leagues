@@ -145,26 +145,40 @@ class CompetitionService : ICompetitionService
         if (now > team.Competition.EndRegistration || now < team.Competition.StartRegistration)
             throw new CompetitionRegistrationPeriodException();
 
-        var occupiedSlots = team.Entries.Sum(e => e.IsTeam ? team.Competition.TeamSize : 1 + e.GuestCount);
+        var occupiedSlots = team.Entries
+        .Where(e => e.Status is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled))
+        .Sum(e => e.IsTeam ? team.Competition.TeamSize : 1 + e.GuestCount);
         var requestedSlots = request.IsTeam ? team.Competition.TeamSize : 1 + request.GuestCount;
 
         if (occupiedSlots + requestedSlots > team.Competition.TeamSize)
             throw new TeamFullException();
 
-        var entry = new CompetitionTeamEntry
+
+        var entry = team.Entries.FirstOrDefault(e =>
+            e.PlayerId == playerId &&
+            e.Status is not (CompetitionTeamEntryStatus.Pending or CompetitionTeamEntryStatus.Confirmed));
+
+        if (entry != null)
         {
-            TeamId = team.Id,
-            CompetitionId = competitionId,
-            PlayerId = playerId,
-            IsTeam = request.IsTeam,
-            GuestCount = request.GuestCount,
-            Comment = request.Comment,
-            Status = CompetitionTeamEntryStatus.Pending
-        };
+            entry.Status = CompetitionTeamEntryStatus.Pending;
+        }
+        else
+        {
+            entry = new CompetitionTeamEntry
+            {
+                TeamId = team.Id,
+                CompetitionId = competitionId,
+                PlayerId = playerId,
+                IsTeam = request.IsTeam,
+                GuestCount = request.GuestCount,
+                Comment = request.Comment,
+                Status = CompetitionTeamEntryStatus.Pending
+            };
+            _context.CompetitionTeamEntries.Add(entry);
+        }
 
         try
         {
-            _context.CompetitionTeamEntries.Add(entry);
             await _context.SaveChangesAsync();
         }
         catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("Duplicate entry") == true)
