@@ -58,6 +58,5 @@ nunit-*.xml
 
 pickuplay.db
 commands
-appsettings.Production.json
 .editorconfig
 Migrations/Sqlite
