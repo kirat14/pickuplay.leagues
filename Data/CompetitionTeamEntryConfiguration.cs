@@ -28,7 +28,7 @@ public class CompetitionTeamEntryConfiguration : IEntityTypeConfiguration<Compet
         builder.HasOne(e => e.Team)
             .WithMany(t => t.Entries)
             .HasForeignKey(e => e.TeamId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(e => e.Competition)
             .WithMany(l => l.Entries)

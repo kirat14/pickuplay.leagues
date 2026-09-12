@@ -11,7 +11,7 @@ public static class CompetitionEntryMapper
         return new CompetitionTeamEntryResponse(
             competitionEntry.Id,
             competitionEntry.TeamId,
-            competitionEntry.Team.Name,
+            competitionEntry.Team?.Name,
             competitionEntry.CompetitionId,
             competitionEntry.Player,
             competitionEntry.IsTeam,

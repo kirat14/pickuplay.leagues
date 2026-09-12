@@ -24,6 +24,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             UnauthorizedAccessException ex => (StatusCodes.Status401Unauthorized, ex.Message),
             AlreadyJoinedCompetitionException ex => (StatusCodes.Status409Conflict, ex.Message),
             TeamFullException ex => (StatusCodes.Status409Conflict, ex.Message),
+            CompetitionFullException ex => (StatusCodes.Status409Conflict, ex.Message),
             TeamNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             CompetitionNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             CompetitionTeamEntryNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),

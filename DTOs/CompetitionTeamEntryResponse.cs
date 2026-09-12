@@ -5,7 +5,7 @@ namespace Pickuplay.Teams.DTOs;
 
 public record CompetitionTeamEntryResponse(
     int Id,
-    int TeamId,
+    int? TeamId,
     string? TeamName,
     int CompetitionId,
     Player Player,

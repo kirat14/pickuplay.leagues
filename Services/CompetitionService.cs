@@ -131,42 +131,87 @@ class CompetitionService : ICompetitionService
 
     }
 
+    public bool isCompetitionFull(Competition competition, int totalPlayers)
+    {
+        int occupiedSlots = 0;
+
+        foreach (var entry in competition.Entries)
+        {
+            if (entry.Status is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled))
+            {
+                occupiedSlots += entry.IsTeam ? competition.TeamSize + competition.NbrOfSubs : 1 + entry.GuestCount;
+                if (occupiedSlots >= totalPlayers)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool IsTeamFull(Team team, int maxTeamSize)
+    {
+        int occupiedSlots = 0;
+
+        foreach (var entry in team.Entries)
+        {
+            if (entry.IsTeam)
+                return true;
+
+            if (entry.Status is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled))
+            {
+                occupiedSlots += 1 + entry.GuestCount;
+                if (occupiedSlots >= maxTeamSize)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     public async Task<JoinCompetitionResponse> JoinCompetitionAsync(int competitionId, int playerId, JoinCompetitionRequest request)
     {
-        var team = await _context.Teams
-            .Include(t => t.Entries)
-            .Include(t => t.Competition)
-            .FirstOrDefaultAsync(t => t.Id == request.TeamId && t.CompetitionId == competitionId);
-
-        if (team == null)
-            throw new TeamNotFoundException();
+        var competition = await _context.Competitions
+        .Include(c => c.Entries)
+        .Include(c => c.Teams)
+        .FirstOrDefaultAsync(c => c.Id == request.CompetitionId)
+        ?? throw new CompetitionNotFoundException($"Competition with ID {request.CompetitionId} was not found.");
 
         DateTime now = DateTime.Now;
-        if (now > team.Competition.EndRegistration || now < team.Competition.StartRegistration)
+        if (now > competition.EndRegistration || now < competition.StartRegistration)
             throw new CompetitionRegistrationPeriodException();
 
-        var occupiedSlots = team.Entries
-        .Where(e => e.Status is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled))
-        .Sum(e => e.IsTeam ? team.Competition.TeamSize : 1 + e.GuestCount);
-        var requestedSlots = request.IsTeam ? team.Competition.TeamSize : 1 + request.GuestCount;
+        int maxTeamSize = competition.TeamSize + competition.NbrOfSubs;
 
-        if (occupiedSlots + requestedSlots > team.Competition.TeamSize)
-            throw new TeamFullException();
+        if (request.TeamId > 0 && !competition.Teams.Any(t => t.Id == request.TeamId))
+            throw new TeamNotFoundException();
+        else
+        {
+            if (request.TeamId > 0)
+            {
+                if (IsTeamFull(competition.Teams.First(t => t.Id == request.TeamId), maxTeamSize))
+                    throw new TeamFullException();
+            }
+            else
+            {
+                if (isCompetitionFull(competition, maxTeamSize * competition.NbrOfTeams))
+                    throw new CompetitionFullException();
+            }
+        }
 
-
-        var entry = team.Entries.FirstOrDefault(e =>
+        var entry = competition.Entries.FirstOrDefault(e =>
             e.PlayerId == playerId &&
             e.Status is not (CompetitionTeamEntryStatus.Pending or CompetitionTeamEntryStatus.Confirmed));
 
         if (entry != null)
         {
             entry.Status = CompetitionTeamEntryStatus.Pending;
+            entry.JoinedAt = DateTime.UtcNow;
         }
         else
         {
             entry = new CompetitionTeamEntry
             {
-                TeamId = team.Id,
+                TeamId = request.TeamId > 0 ? request.TeamId : null,
                 CompetitionId = competitionId,
                 PlayerId = playerId,
                 IsTeam = request.IsTeam,
@@ -188,7 +233,7 @@ class CompetitionService : ICompetitionService
 
         return new JoinCompetitionResponse(
             entry.Id,
-            entry.Team.Name,
+            entry.Team?.Name,
             entry.IsTeam,
             entry.GuestCount,
             entry.Comment,
@@ -196,7 +241,7 @@ class CompetitionService : ICompetitionService
             entry.JoinedAt);
     }
 
-    public async Task<CompetitionTeamEntry> UpdateEntryStatus(int entryId, CompetitionTeamEntryStatus status)
+    public async Task<CompetitionTeamEntry> UpdateEntry(int entryId, CompetitionTeamEntryRequest entry)
     {
         var competition_entry = await _context.CompetitionTeamEntries
             .FirstOrDefaultAsync(e => e.Id == entryId);
@@ -206,7 +251,12 @@ class CompetitionService : ICompetitionService
             throw new CompetitionTeamEntryNotFoundException();
         }
 
-        competition_entry.Status = status;
+        competition_entry.Status = entry.Status ?? competition_entry.Status;
+        competition_entry.TeamId = entry.TeamId > 0 ? entry.TeamId : competition_entry.TeamId;
+        competition_entry.Comment = entry.Comment ?? competition_entry.Comment;
+        competition_entry.IsTeam = entry.IsTeam ?? competition_entry.IsTeam;
+        competition_entry.GuestCount = entry.GuestCount > 0 ? entry.GuestCount.Value : competition_entry.GuestCount;
+
         await _context.SaveChangesAsync();
 
         return competition_entry;

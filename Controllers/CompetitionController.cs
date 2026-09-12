@@ -74,10 +74,10 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
 
     [HttpPatch("~/api/competition-entries/{entryId}")]
     [Authorize(Roles = "ADMIN, ORGANIZER")]
-    public async Task<IActionResult> UpdateEntryStatus([FromRoute] int entryId, [FromQuery] CompetitionTeamEntryStatus status)
+    public async Task<IActionResult> UpdateEntry([FromRoute] int entryId, [FromBody] CompetitionTeamEntryRequest entry)
     {
-        var competition_entry = await _competitionService.UpdateEntryStatus(entryId, status);
-        return Ok(new ApiResponse<CompetitionTeamEntry>("success", "The status has been updated successfully", competition_entry));
+        var competition_entry = await _competitionService.UpdateEntry(entryId, entry);
+        return Ok(new ApiResponse<CompetitionTeamEntry>("success", "The competition entry has been updated successfully", competition_entry));
     }
 
     [HttpGet]
