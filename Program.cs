@@ -90,6 +90,20 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    var storagePath = builder.Configuration["Storage:UploadsPath"];
+
+    if (!string.IsNullOrEmpty(storagePath))
+    {
+        Directory.CreateDirectory(storagePath);
+
+        app.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(storagePath),
+            RequestPath = "/uploads",
+            ServeUnknownFileTypes = true
+        });
+    }
 }
 
 app.UseExceptionHandler();

@@ -1,4 +1,5 @@
 using Pickuplay.DTOs;
+using Pickuplay.Services;
 using Pickuplay.Teams.DTOs;
 using Pickuplay.Teams.Models;
 
@@ -6,7 +7,7 @@ namespace Pickuplay.Mappers;
 
 public static class CompetitionMapper
 {
-    public static CompetitionResponse ToResponse(this Competition competition)
+    public static CompetitionResponse ToResponse(this Competition competition, IStorageService storageService)
     {
         return new CompetitionResponse(
             Id: competition.Id,
@@ -43,7 +44,9 @@ public static class CompetitionMapper
                 t.Entries.Count + t.Entries.Sum(e => e.GuestCount)
             )).ToList(),
             TeamCount: competition.Teams.Count,
-            AvailableSpots: ((competition.TeamSize + competition.NbrOfSubs) * competition.NbrOfTeams) - (competition.Entries.Count + competition.Entries.Sum(e => e.GuestCount))
+            AvailableSpots: ((competition.TeamSize + competition.NbrOfSubs) * competition.NbrOfTeams) - (competition.Entries.Count + competition.Entries.Sum(e => e.GuestCount)),
+            storageService.GetFileUrl(competition.Logo),
+            storageService.GetFileUrl(competition.CoverPhoto)
         );
     }
 }

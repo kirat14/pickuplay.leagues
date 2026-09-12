@@ -70,17 +70,17 @@ class CompetitionService : ICompetitionService
         try
         {
             var logoTask = request.Logo != null
-            ? _storageService.SaveFile(request.Logo, $"logo_{competition.Id}", "competitions")
+            ? _storageService.SaveFile(request.Logo, "competitions")
             : Task.FromResult<string?>(null);
 
             var coverTask = request.CoverPhoto != null
-                ? _storageService.SaveFile(request.CoverPhoto, $"cover_{competition.Id}", "competitions")
+                ? _storageService.SaveFile(request.CoverPhoto, "competitions")
                 : Task.FromResult<string?>(null);
 
-            await Task.WhenAll(logoTask, coverTask);
+            string?[] results = await Task.WhenAll(logoTask, coverTask);
 
-            competition.Logo = await logoTask;
-            competition.CoverPhoto = await coverTask;
+            competition.Logo = results[0];
+            competition.CoverPhoto = results[1];
             _context.SaveChanges();
         }
         catch (System.Exception)
@@ -89,7 +89,7 @@ class CompetitionService : ICompetitionService
             uploadWarning = "Competition was created, but the image upload failed. You can try uploading it again later.";
         }
 
-        return new CompetitionCreationResult(competition, uploadWarning);
+        return new CompetitionCreationResult(competition.ToResponse(_storageService), uploadWarning);
     }
 
     public async Task<CompetitionResponse> GetCompetition(int id)
@@ -103,7 +103,7 @@ class CompetitionService : ICompetitionService
         if (competition == null)
             throw new CompetitionNotFoundException();
 
-        return competition.ToResponse();
+        return competition.ToResponse(_storageService);
     }
 
     public async Task<PagedResponse<CompetitionResponse>> GetCompetitions(int page, int pageSize)
@@ -121,7 +121,7 @@ class CompetitionService : ICompetitionService
 
         return new PagedResponse<CompetitionResponse>
         {
-            Content = leagues.Select(l => l.ToResponse()).ToList(),
+            Content = leagues.Select(l => l.ToResponse(_storageService)).ToList(),
             CurrentPage = page,
             TotalPages = totalPages,
             TotalElements = totalElements,

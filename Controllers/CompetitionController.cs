@@ -43,7 +43,7 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
         return Ok(new ApiResponse<CompetitionResponse>(
             result.UploadWarning == null ? "success" : "warning",
             result.UploadWarning ?? "Competition created successfully",
-            result.Competition.ToResponse()
+            result.Competition
         ));
 
     }

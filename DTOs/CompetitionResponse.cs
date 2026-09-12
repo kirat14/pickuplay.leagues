@@ -27,5 +27,7 @@ public record CompetitionResponse(
     bool Pennies,
     IList<TeamResponse> Teams,
     int TeamCount,
-    int AvailableSpots
+    int AvailableSpots,
+    string? Logo,
+    string? CoverPhoto
 );
