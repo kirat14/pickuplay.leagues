@@ -65,10 +65,10 @@ public class CompetitionConfiguration : IEntityTypeConfiguration<Competition>
             .IsRequired();
 
         builder.Property(l => l.Logo)
-            .HasMaxLength(50);
+            .HasMaxLength(128);
 
         builder.Property(l => l.CoverPhoto)
-            .HasMaxLength(50);
+            .HasMaxLength(128);
 
         builder.Property(l => l.TeamSize)
             .IsRequired();
