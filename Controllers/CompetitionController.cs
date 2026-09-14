@@ -48,6 +48,30 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
 
     }
 
+    [HttpPatch("{id}")]
+    [Authorize(Roles = "ADMIN, ORGANIZER")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateCompetition([FromRoute] int id, [FromForm] UpdateCompetition request)
+    {
+        var userIdClaim = User.FindFirst("id")?.Value;
+
+        if (!int.TryParse(userIdClaim, out var organizerId))
+        {
+            throw new UnauthorizedAccessException("User ID could not be found in the token.");
+        }
+
+        CompetitionCreationResult result = await _competitionService.UpdateCompetition(id, request);
+
+
+
+        return Ok(new ApiResponse<CompetitionResponse>(
+            result.UploadWarning == null ? "success" : "warning",
+            result.UploadWarning ?? "Competition updated successfully",
+            result.Competition
+        ));
+
+    }
+
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCompetition([FromRoute] int id)

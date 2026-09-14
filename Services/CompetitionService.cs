@@ -92,6 +92,81 @@ class CompetitionService : ICompetitionService
         return new CompetitionCreationResult(competition.ToResponse(_storageService), uploadWarning);
     }
 
+    public async Task<CompetitionCreationResult> UpdateCompetition(int id, UpdateCompetition request)
+    {
+        var competition = await _context.Competitions
+        .FirstOrDefaultAsync(l => l.Id == id);
+
+        if (competition == null)
+            throw new CompetitionNotFoundException();
+
+
+        competition.Name = request.Name ?? competition.Name;
+        competition.SportTypeId = request.SportTypeId ?? competition.SportTypeId;
+        competition.City = request.City ?? competition.City;
+        competition.Address = request.Address ?? competition.Address;
+        competition.StartDate = request.StartDate ?? competition.StartDate;
+        competition.Description = request.Description ?? competition.Description;
+        competition.StartRegistration = request.StartRegistration ?? competition.StartRegistration;
+        competition.EndRegistration = request.EndRegistration ?? competition.EndRegistration;
+        competition.NbrOfTeams = request.NbrOfTeams ?? competition.NbrOfTeams;
+        competition.TeamSize = request.TeamSize ?? competition.TeamSize;
+        competition.NbrOfSubs = request.NbrOfSubs ?? competition.NbrOfSubs;
+        competition.Format = request.Format ?? competition.Format;
+        competition.PricePlayer = request.PricePlayer ?? competition.PricePlayer;
+        competition.Gender = request.Gender ?? competition.Gender;
+        competition.MinimumAge = request.MinimumAge ?? competition.MinimumAge;
+        competition.Comment = request.Comment ?? competition.Comment;
+        competition.Referee = request.Referee ?? competition.Referee;
+        competition.Prize = request.Prize ?? competition.Prize;
+        competition.Pennies = request.Pennies ?? competition.Pennies;
+
+        if (competition.Entries.Count == 0 && request.TeamNames is not null)
+        {
+            for (int i = 0; i < request.NbrOfTeams; i++)
+            {
+                var teamName = request.TeamNames[i];
+
+                competition.Teams.Add(new Team
+                {
+                    Name = teamName
+                });
+            }
+        }
+
+        _context.SaveChanges();
+
+        string? uploadWarning = null;
+
+        try
+        {
+            if (request.Logo != null)
+            {
+                if (competition.Logo != null)
+                    await _storageService.DeleteFileAsync(competition.Logo);
+
+                competition.Logo = await _storageService.SaveFile(request.Logo, "competitions");
+            }
+
+            if (request.CoverPhoto != null)
+            {
+                if (competition.CoverPhoto != null)
+                    await _storageService.DeleteFileAsync(competition.CoverPhoto);
+
+                competition.CoverPhoto = await _storageService.SaveFile(request.CoverPhoto, "competitions");
+            }
+
+
+            _context.SaveChanges();
+        }
+        catch (System.Exception)
+        {
+            uploadWarning = "Image upload failed. You can try uploading it again later.";
+        }
+
+        return new CompetitionCreationResult(competition.ToResponse(_storageService), uploadWarning);
+    }
+
     public async Task<CompetitionResponse> GetCompetition(int id)
     {
         var competition = await _context.Competitions

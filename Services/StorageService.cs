@@ -31,4 +31,18 @@ class StorageService : IStorageService
     }
 
     public string? GetFileUrl(string? filePath) => !string.IsNullOrEmpty(filePath) ? $"{_baseUrl}/{filePath}" : null;
+
+    public Task DeleteFileAsync(string? relativeFilePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativeFilePath))
+            return Task.CompletedTask;
+
+        var fullPath = Path.Combine(_uploadsPath, relativeFilePath);
+        if (File.Exists(fullPath))
+        {
+            File.Delete(fullPath);
+        }
+
+        return Task.CompletedTask;
+    }
 }

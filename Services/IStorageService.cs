@@ -12,6 +12,12 @@ public interface IStorageService
     Task<string?> SaveFile(IFormFile file, string folderName);
 
     /// <summary>
+    /// Deletes a file from storage if it exists.
+    /// </summary>
+    /// <param name="relativeFilePath">The relative path of the file to delete.</param>
+    Task DeleteFileAsync(string? relativeFilePath);
+
+    /// <summary>
     /// Resolves the full public URL for a given relative file path.
     /// </summary>
     /// <param name="relativeFilePath">The relative path stored in the database.</param>

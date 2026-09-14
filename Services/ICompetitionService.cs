@@ -8,6 +8,7 @@ namespace Pickuplay.Services;
 public interface ICompetitionService
 {
      Task<CompetitionCreationResult> CreateCompetition(CreateCompetitionRequest request, int organizerId);
+     Task<CompetitionCreationResult> UpdateCompetition(int id, UpdateCompetition request);
 
      Task<JoinCompetitionResponse> JoinCompetitionAsync(int competitionId, int playerId, JoinCompetitionRequest request);
 
