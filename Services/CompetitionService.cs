@@ -248,8 +248,8 @@ class CompetitionService : ICompetitionService
         var competition = await _context.Competitions
         .Include(c => c.Entries)
         .Include(c => c.Teams)
-        .FirstOrDefaultAsync(c => c.Id == request.CompetitionId)
-        ?? throw new CompetitionNotFoundException($"Competition with ID {request.CompetitionId} was not found.");
+        .FirstOrDefaultAsync(c => c.Id == competitionId)
+        ?? throw new CompetitionNotFoundException($"Competition with ID {competitionId} was not found.");
 
         DateTime now = DateTime.Now;
         if (now > competition.EndRegistration || now < competition.StartRegistration)
