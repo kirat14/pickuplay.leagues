@@ -326,6 +326,14 @@ class CompetitionService : ICompetitionService
             throw new CompetitionTeamEntryNotFoundException();
         }
 
+        var team = await _context.Teams
+            .FirstOrDefaultAsync(t => t.Id == entry.TeamId);
+
+
+
+        if (team == null)
+            throw new TeamNotFoundException();
+
         competition_entry.Status = entry.Status ?? competition_entry.Status;
         competition_entry.TeamId = entry.TeamId > 0 ? entry.TeamId : competition_entry.TeamId;
         competition_entry.Comment = entry.Comment ?? competition_entry.Comment;
