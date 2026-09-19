@@ -101,7 +101,7 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
     public async Task<IActionResult> UpdateEntry([FromRoute] int entryId, [FromBody] CompetitionTeamEntryRequest entry)
     {
         var competition_entry = await _competitionService.UpdateEntry(entryId, entry);
-        return Ok(new ApiResponse<CompetitionTeamEntry>("success", "The competition entry has been updated successfully", competition_entry));
+        return Ok(new ApiResponse<CompetitionTeamEntryResponse>("success", "The competition entry has been updated successfully", competition_entry.ToResponse()));
     }
 
     [HttpGet]
