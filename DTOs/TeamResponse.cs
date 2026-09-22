@@ -1,3 +1,5 @@
+using Pickuplay.Teams.Models;
+
 namespace Pickuplay.Teams.DTOs;
 
 public record TeamResponse(
@@ -10,5 +12,6 @@ public record TeamResponse(
     int Wins,
     int Losses,
     int Points,
-    int JoinedPlayersCount
+    int JoinedPlayersCount,
+    IList<Player>? Players = null
 );

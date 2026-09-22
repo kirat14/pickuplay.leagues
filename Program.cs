@@ -33,6 +33,7 @@ builder.Services.AddControllers()
 // Services
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<ICompetitionService, CompetitionService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
