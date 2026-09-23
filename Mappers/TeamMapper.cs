@@ -20,7 +20,7 @@ public static class TeamMapper
                 t.Losses,
                 t.Points,
                 t.Entries.Count + t.Entries.Sum(e => e.GuestCount),
-                t.Entries.Select(e => e.Player).ToList()
+                t.Entries.Select(e => e.Player.ToResponse(e.GuestCount)).ToList()
             );
     }
 }

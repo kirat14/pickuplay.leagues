@@ -13,5 +13,5 @@ public record TeamResponse(
     int Losses,
     int Points,
     int JoinedPlayersCount,
-    IList<Player>? Players = null
+    IList<PlayerResponse>? Players = null
 );
