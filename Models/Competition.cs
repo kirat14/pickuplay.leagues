@@ -40,7 +40,8 @@ public class Competition
     public string? Logo { get; set; }
     public string? CoverPhoto { get; set; }
 
-    public IList<Team> Teams { get; set; } = [];
+    private readonly List<Team> _teams = new();
+    public IReadOnlyList<Team> Teams => _teams; // shortcut for get { return _teams; }
 
     public IList<CompetitionTeamEntry> Entries { get; set; } = [];
 
@@ -48,4 +49,12 @@ public class Competition
     public bool Referee { get; set; }
     public bool Prize { get; set; }
     public bool Pennies { get; set; }
+
+    public void AddTeam(Team team)
+    {
+        if (_teams.Count >= NbrOfTeams)
+            throw new InvalidOperationException("Competition Team Size is " + NbrOfTeams);
+
+        _teams.Add(team);
+    }
 }

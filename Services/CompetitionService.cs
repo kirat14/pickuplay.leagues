@@ -49,11 +49,11 @@ class CompetitionService : ICompetitionService
         };
 
 
-        for (int i = 0; i < request.NbrOfTeams; i++)
+        for (int i = 0; i < request.TeamNames.Count; i++)
         {
             var teamName = i < request.TeamNames.Count ? request.TeamNames[i] : $"Team {i + 1}";
 
-            competition.Teams.Add(new Team
+            competition.AddTeam(new Team
             {
                 Name = teamName
             });
@@ -123,11 +123,11 @@ class CompetitionService : ICompetitionService
 
         if (competition.Entries.Count == 0 && request.TeamNames is not null)
         {
-            for (int i = 0; i < request.NbrOfTeams; i++)
+            for (int i = 0; i < request.TeamNames.Count; i++)
             {
                 var teamName = request.TeamNames[i];
 
-                competition.Teams.Add(new Team
+                competition.AddTeam(new Team
                 {
                     Name = teamName
                 });
