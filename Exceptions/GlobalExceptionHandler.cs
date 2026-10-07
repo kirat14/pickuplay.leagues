@@ -29,6 +29,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             CompetitionNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             CompetitionTeamEntryNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             CompetitionRegistrationPeriodException ex => (StatusCodes.Status409Conflict, ex.Message),
+            InvalidOperationException ex => (StatusCodes.Status409Conflict, ex.Message),
             _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
         };
 
