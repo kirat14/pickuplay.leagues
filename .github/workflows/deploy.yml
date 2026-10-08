@@ -49,6 +49,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             echo 'ConnectionStrings__DefaultConnection=${{ secrets.DB_CONNECTION_STRING }}' | sudo tee /etc/pickuplay-teams.env > /dev/null
+            echo 'Stripe__SecretKey=${{ secrets.STRIPE_SECRET_KEY }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
+            echo 'Stripe__WebhookSecret=${{ secrets.STRIPE_WEBHOOK_SECRET }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
             sudo chmod 600 /etc/pickuplay-teams.env
 
       - name: Restart service

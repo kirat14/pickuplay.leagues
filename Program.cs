@@ -1,15 +1,21 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 using Pickuplay.DTOs;
 using Pickuplay.Services;
 using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
+using Pickuplay.Teams.Payment;
+
+using Stripe;
 
 using System.Security.Cryptography;
 using System.Text.Json.Serialization;
+
+using File = System.IO.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +40,7 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<ICompetitionService, CompetitionService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<PaymentService, PaymentService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
@@ -55,6 +62,18 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
             data: null
         ));
     };
+});
+
+builder.Services
+    .AddOptions<StripeOptions>()
+    .Bind(builder.Configuration.GetSection(StripeOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();   // app fails fast if a key is missing
+
+builder.Services.AddSingleton<IStripeClient>(sp =>
+{
+    var opts = sp.GetRequiredService<IOptions<StripeOptions>>().Value;
+    return new StripeClient(opts.SecretKey);
 });
 
 // Load the public key
