@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 using Pickuplay.DTOs;
+using Pickuplay.Enums;
 using Pickuplay.Services;
 using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
@@ -57,7 +58,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         });
 
         return new BadRequestObjectResult(new ApiResponse<object>(
-            type: "error",
+            type: ApiResponseStatus.Error,
             message: errors.First().Message,
             data: null
         ));
