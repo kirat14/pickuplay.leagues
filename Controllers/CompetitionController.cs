@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization; // gives us [Authorize] attribute
 using Microsoft.AspNetCore.Mvc;
 
 using Pickuplay.DTOs;
+using Pickuplay.Enums;
 using Pickuplay.Mappers;
 using Pickuplay.Services;
 using Pickuplay.Teams.Data;
@@ -41,7 +42,7 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
 
 
         return Ok(new ApiResponse<CompetitionResponse>(
-            result.UploadWarning == null ? "success" : "warning",
+            result.UploadWarning == null ? ApiResponseStatus.Success : ApiResponseStatus.Warning,
             result.UploadWarning ?? "Competition created successfully",
             result.Competition
         ));
@@ -65,7 +66,7 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
 
 
         return Ok(new ApiResponse<CompetitionResponse>(
-            result.UploadWarning == null ? "success" : "warning",
+            result.UploadWarning == null ? ApiResponseStatus.Success : ApiResponseStatus.Warning,
             result.UploadWarning ?? "Competition updated successfully",
             result.Competition
         ));

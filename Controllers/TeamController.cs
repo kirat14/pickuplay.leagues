@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization; // gives us [Authorize] attribute
 using Microsoft.AspNetCore.Mvc;
 
 using Pickuplay.DTOs;
+using Pickuplay.Enums;
 using Pickuplay.Mappers;
 using Pickuplay.Services;
 using Pickuplay.Teams.Data;

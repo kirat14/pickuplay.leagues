@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 
 using Pickuplay.DTOs;
+using Pickuplay.Enums;
 using Pickuplay.Teams.Exceptions;
 
 namespace Pickuplay.Teams;
