@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 
+using Pickuplay.DTOs;
+using Pickuplay.Teams.Payment.DTO;
+
 namespace Pickuplay.Teams.Payment;
 
 [ApiController]
@@ -7,11 +10,9 @@ namespace Pickuplay.Teams.Payment;
 public class PaymentsController(PaymentService paymentService) : ControllerBase
 {
     [HttpPost("create-intent")]
-    public async Task<IActionResult> CreateIntent(CreateIntentRequest request, CancellationToken ct)
+    public async Task<IActionResult> CreateIntent([FromBody] CreateIntentRequest request, CancellationToken ct)
     {
         var clientSecret = await paymentService.CreateIntentAsync(request.AmountInCents, ct);
-        return Ok(new { clientSecret });
+        return Ok(new ApiResponse<string>("success", "Intent Created successfully.", clientSecret));
     }
 }
-
-public record CreateIntentRequest(long AmountInCents);
