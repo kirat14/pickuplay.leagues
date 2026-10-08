@@ -77,7 +77,7 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
     public async Task<IActionResult> GetCompetition([FromRoute] int id)
     {
         var competition = await _competitionService.GetCompetition(id);
-        return Ok(new ApiResponse<CompetitionResponse>("success", "Competition retrived successfully.", competition));
+        return Ok(new ApiResponse<CompetitionResponse>(ApiResponseStatus.Success, "Competition retrived successfully.", competition));
     }
 
 
@@ -101,7 +101,7 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
     public async Task<IActionResult> UpdateEntry([FromRoute] int entryId, [FromBody] CompetitionTeamEntryRequest entry)
     {
         var competition_entry = await _competitionService.UpdateEntry(entryId, entry);
-        return Ok(new ApiResponse<CompetitionTeamEntryResponse>("success", "The competition entry has been updated successfully", competition_entry.ToResponse()));
+        return Ok(new ApiResponse<CompetitionTeamEntryResponse>(ApiResponseStatus.Success, "The competition entry has been updated successfully", competition_entry.ToResponse()));
     }
 
     [HttpGet]
@@ -109,13 +109,13 @@ public class CompetitionController : ControllerBase  // gives us Ok(), NotFound(
     [FromQuery] int pageSize = 10)
     {
         var competitions = await _competitionService.GetCompetitions(page, pageSize);
-        return Ok(new ApiResponse<PagedResponse<CompetitionResponse>>("success", "Leagues retrived successfully", competitions));
+        return Ok(new ApiResponse<PagedResponse<CompetitionResponse>>(ApiResponseStatus.Success, "Leagues retrived successfully", competitions));
     }
 
     [HttpGet("~/api/competition-entries")]
     public async Task<IActionResult> GetPendingCompetitionEntries([FromQuery] CompetitionTeamEntryStatus status, int organizerId)
     {
         var competitionTeamEntries = await _competitionService.GetEntries(organizerId, status);
-        return Ok(new ApiResponse<List<CompetitionTeamEntryResponse>>("success", "Entries has been retirived successfully", competitionTeamEntries));
+        return Ok(new ApiResponse<List<CompetitionTeamEntryResponse>>(ApiResponseStatus.Success, "Entries has been retirived successfully", competitionTeamEntries));
     }
 }

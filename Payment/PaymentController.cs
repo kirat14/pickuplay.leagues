@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using Pickuplay.DTOs;
+using Pickuplay.Enums;
 using Pickuplay.Teams.Payment.DTO;
 
 namespace Pickuplay.Teams.Payment;
@@ -13,6 +14,6 @@ public class PaymentsController(PaymentService paymentService) : ControllerBase
     public async Task<IActionResult> CreateIntent([FromBody] CreateIntentRequest request, CancellationToken ct)
     {
         var clientSecret = await paymentService.CreateIntentAsync(request.AmountInCents, ct);
-        return Ok(new ApiResponse<string>("success", "Intent Created successfully.", clientSecret));
+        return Ok(new ApiResponse<string>(ApiResponseStatus.Success, "Intent Created successfully.", clientSecret));
     }
 }

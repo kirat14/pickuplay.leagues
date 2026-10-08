@@ -29,7 +29,7 @@ public class TeamController : ControllerBase  // gives us Ok(), NotFound(), etc.
     public async Task<IActionResult> GetTeam([FromRoute] int id)
     {
         var team = await _teamService.GetTeam(id);
-        return Ok(new ApiResponse<TeamResponse>("success", "Team retrived successfully.", team));
+        return Ok(new ApiResponse<TeamResponse>(ApiResponseStatus.Success, "Team retrived successfully.", team));
     }
 
     /*     [HttpGet]
@@ -37,7 +37,7 @@ public class TeamController : ControllerBase  // gives us Ok(), NotFound(), etc.
         [FromQuery] int pageSize = 10)
         {
             var competitions = await _teamService.GetCompetitions(page, pageSize);
-            return Ok(new ApiResponse<PagedResponse<CompetitionResponse>>("success", "Leagues retrived successfully", competitions));
+            return Ok(new ApiResponse<PagedResponse<CompetitionResponse>>(ApiResponseStatus.Success, "Leagues retrived successfully", competitions));
         } */
 
 }

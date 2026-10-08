@@ -1,2 +1,5 @@
+using Pickuplay.Enums;
+
 namespace Pickuplay.DTOs;
-public record ApiResponse<T>(string type, string message, T data){}
+
+public record ApiResponse<T>(ApiResponseStatus type, string message, T data) { }
