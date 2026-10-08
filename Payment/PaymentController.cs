@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using Pickuplay.DTOs;
@@ -11,6 +12,7 @@ namespace Pickuplay.Teams.Payment;
 public class PaymentsController(PaymentService paymentService) : ControllerBase
 {
     [HttpPost("create-intent")]
+    [Authorize]
     public async Task<IActionResult> CreateIntent([FromBody] CreateIntentRequest request, CancellationToken ct)
     {
         var clientSecret = await paymentService.CreateIntentAsync(request.AmountInCents, ct);
