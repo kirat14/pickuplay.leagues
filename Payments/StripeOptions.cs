@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Pickuplay.Teams.Payment;
+namespace Pickuplay.Teams.Payments;
 
 public sealed class StripeOptions
 {

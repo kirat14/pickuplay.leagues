@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
+using Pickuplay.Teams.Payments.Models;
 using Pickuplay.Teams.Models;
 
 namespace Pickuplay.Teams.Data;
@@ -13,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<Team> Teams { get; set; }
     public DbSet<SportType> SportTypes { get; set; }
     public DbSet<CompetitionTeamEntry> CompetitionTeamEntries { get; set; }
+    public DbSet<PaymentEntity> Payments => Set<PaymentEntity>();
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

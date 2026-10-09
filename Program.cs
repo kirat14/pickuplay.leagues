@@ -9,7 +9,7 @@ using Pickuplay.Enums;
 using Pickuplay.Services;
 using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
-using Pickuplay.Teams.Payment;
+using Pickuplay.Teams.Payments;
 
 using Stripe;
 
