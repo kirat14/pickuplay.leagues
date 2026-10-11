@@ -10,6 +10,7 @@ using Pickuplay.Services;
 using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.Payments;
+using Pickuplay.Teams.Payments.Jobs;
 
 using Stripe;
 
@@ -36,6 +37,9 @@ builder.Services.AddControllers()
             new JsonStringEnumConverter()
         );
     });
+
+// Job service
+builder.Services.AddHostedService<PaymentExpiryService>();
 
 // Services
 builder.Services.AddScoped<IStorageService, StorageService>();

@@ -60,3 +60,5 @@ pickuplay.db
 commands
 .editorconfig
 Migrations/Sqlite
+
+.vscode/
