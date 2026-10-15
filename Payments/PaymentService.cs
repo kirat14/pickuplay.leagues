@@ -62,6 +62,13 @@ public sealed class PaymentService(
         if (stripeEvent.Data.Object is not PaymentIntent intent)
             return;
 
+        _logger.LogInformation(
+            "Stripe event {EventId} ({Type}) for intent {IntentId}",
+            stripeEvent.Id,
+            stripeEvent.Type,
+            intent.Id
+        );
+
         var updated = stripeEvent.Type switch
         {
             EventTypes.PaymentIntentSucceeded => await db
@@ -101,12 +108,10 @@ public sealed class PaymentService(
             _ => -1,
         };
 
-        if (updated == 0)
-            _logger.LogInformation(
-                "Event {EventId} ({Type}) skipped: payment {IntentId} not found or not Pending",
-                stripeEvent.Id,
-                stripeEvent.Type,
-                intent.Id
-            );
+        _logger.LogInformation(
+            "Event {EventId} processed, rows updated: {Count}",
+            stripeEvent.Id,
+            updated
+        );
     }
 }
