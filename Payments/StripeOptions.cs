@@ -7,5 +7,6 @@ public sealed class StripeOptions
     public const string SectionName = "Stripe";
 
     [Required] public string SecretKey { get; init; } = null!;
+    [Required] public string WebhookSecret { get; init; } = default!;
 
 }
