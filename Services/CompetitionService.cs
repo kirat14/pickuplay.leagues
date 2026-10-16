@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-
 using Pickuplay.DTOs;
 using Pickuplay.Mappers;
 using Pickuplay.Teams.Data;
@@ -21,9 +20,11 @@ class CompetitionService : ICompetitionService
         _storageService = storageService;
     }
 
-    public async Task<CompetitionCreationResult> CreateCompetition(CreateCompetitionRequest request, int organizerId)
+    public async Task<CompetitionCreationResult> CreateCompetition(
+        CreateCompetitionRequest request,
+        int organizerId
+    )
     {
-
         var competition = new Competition
         {
             OrganizerId = organizerId,
@@ -45,37 +46,34 @@ class CompetitionService : ICompetitionService
             Comment = request.Comment,
             Referee = request.Referee,
             Prize = request.Prize,
-            Pennies = request.Pennies
+            Pennies = request.Pennies,
         };
-
 
         for (int i = 0; i < request.TeamNames.Count; i++)
         {
             var teamName = i < request.TeamNames.Count ? request.TeamNames[i] : $"Team {i + 1}";
 
-            competition.AddTeam(new Team
-            {
-                Name = teamName
-            });
+            competition.AddTeam(new Team { Name = teamName });
         }
 
         _context.Competitions.Add(competition);
         _context.SaveChanges();
 
-        competition = await _context.Competitions
-        .FirstAsync(l => l.Id == competition.Id);
+        competition = await _context.Competitions.FirstAsync(l => l.Id == competition.Id);
 
         string? uploadWarning = null;
 
         try
         {
-            var logoTask = request.Logo != null
-            ? _storageService.SaveFile(request.Logo, "competitions")
-            : Task.FromResult<string?>(null);
+            var logoTask =
+                request.Logo != null
+                    ? _storageService.SaveFile(request.Logo, "competitions")
+                    : Task.FromResult<string?>(null);
 
-            var coverTask = request.CoverPhoto != null
-                ? _storageService.SaveFile(request.CoverPhoto, "competitions")
-                : Task.FromResult<string?>(null);
+            var coverTask =
+                request.CoverPhoto != null
+                    ? _storageService.SaveFile(request.CoverPhoto, "competitions")
+                    : Task.FromResult<string?>(null);
 
             string?[] results = await Task.WhenAll(logoTask, coverTask);
 
@@ -85,21 +83,25 @@ class CompetitionService : ICompetitionService
         }
         catch (System.Exception)
         {
-
-            uploadWarning = "Competition was created, but the image upload failed. You can try uploading it again later.";
+            uploadWarning =
+                "Competition was created, but the image upload failed. You can try uploading it again later.";
         }
 
-        return new CompetitionCreationResult(competition.ToResponse(_storageService), uploadWarning);
+        return new CompetitionCreationResult(
+            competition.ToResponse(_storageService),
+            uploadWarning
+        );
     }
 
-    public async Task<CompetitionCreationResult> UpdateCompetition(int id, UpdateCompetition request)
+    public async Task<CompetitionCreationResult> UpdateCompetition(
+        int id,
+        UpdateCompetition request
+    )
     {
-        var competition = await _context.Competitions
-        .FirstOrDefaultAsync(l => l.Id == id);
+        var competition = await _context.Competitions.FirstOrDefaultAsync(l => l.Id == id);
 
         if (competition == null)
             throw new CompetitionNotFoundException();
-
 
         competition.Name = request.Name ?? competition.Name;
         competition.SportTypeId = request.SportTypeId ?? competition.SportTypeId;
@@ -123,14 +125,22 @@ class CompetitionService : ICompetitionService
 
         if (competition.Entries.Count == 0 && request.TeamNames is not null)
         {
+            String[] colors =
+            {
+                "yellow",
+                "red",
+                "green",
+                "blue",
+                "orange",
+                "purple",
+                "black",
+                "white",
+            };
             for (int i = 0; i < request.TeamNames.Count; i++)
             {
                 var teamName = request.TeamNames[i];
 
-                competition.AddTeam(new Team
-                {
-                    Name = teamName
-                });
+                competition.AddTeam(new Team { Name = teamName, Color = colors[i] });
             }
         }
 
@@ -153,9 +163,11 @@ class CompetitionService : ICompetitionService
                 if (competition.CoverPhoto != null)
                     await _storageService.DeleteFileAsync(competition.CoverPhoto);
 
-                competition.CoverPhoto = await _storageService.SaveFile(request.CoverPhoto, "competitions");
+                competition.CoverPhoto = await _storageService.SaveFile(
+                    request.CoverPhoto,
+                    "competitions"
+                );
             }
-
 
             _context.SaveChanges();
         }
@@ -164,16 +176,19 @@ class CompetitionService : ICompetitionService
             uploadWarning = "Image upload failed. You can try uploading it again later.";
         }
 
-        return new CompetitionCreationResult(competition.ToResponse(_storageService), uploadWarning);
+        return new CompetitionCreationResult(
+            competition.ToResponse(_storageService),
+            uploadWarning
+        );
     }
 
     public async Task<CompetitionResponse> GetCompetition(int id)
     {
-        var competition = await _context.Competitions
-        .Include(c => c.Teams)
-        .Include(c => c.Entries)
-        .ThenInclude(e => e.Player)
-        .FirstOrDefaultAsync(l => l.Id == id);
+        var competition = await _context
+            .Competitions.Include(c => c.Teams)
+            .Include(c => c.Entries)
+                .ThenInclude(e => e.Player)
+            .FirstOrDefaultAsync(l => l.Id == id);
 
         if (competition == null)
             throw new CompetitionNotFoundException();
@@ -185,12 +200,12 @@ class CompetitionService : ICompetitionService
     {
         var totalElements = await _context.Competitions.CountAsync();
 
-        var leagues = await _context.Competitions
-        .Include(c => c.Teams)
-        .Include(c => c.Entries)
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .ToListAsync();
+        var leagues = await _context
+            .Competitions.Include(c => c.Teams)
+            .Include(c => c.Entries)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
 
         var totalPages = (int)Math.Ceiling(totalElements / (double)pageSize);
 
@@ -201,9 +216,8 @@ class CompetitionService : ICompetitionService
             TotalPages = totalPages,
             TotalElements = totalElements,
             HasNext = page < totalPages,
-            HasPrevious = page > 1
+            HasPrevious = page > 1,
         };
-
     }
 
     public bool isCompetitionFull(Competition competition, int totalPlayers)
@@ -212,9 +226,14 @@ class CompetitionService : ICompetitionService
 
         foreach (var entry in competition.Entries)
         {
-            if (entry.Status is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled))
+            if (
+                entry.Status
+                is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled)
+            )
             {
-                occupiedSlots += entry.IsTeam ? competition.TeamSize + competition.NbrOfSubs : 1 + entry.GuestCount;
+                occupiedSlots += entry.IsTeam
+                    ? competition.TeamSize + competition.NbrOfSubs
+                    : 1 + entry.GuestCount;
                 if (occupiedSlots >= totalPlayers)
                     return true;
             }
@@ -232,7 +251,10 @@ class CompetitionService : ICompetitionService
             if (entry.IsTeam)
                 return true;
 
-            if (entry.Status is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled))
+            if (
+                entry.Status
+                is not (CompetitionTeamEntryStatus.Rejected or CompetitionTeamEntryStatus.Cancelled)
+            )
             {
                 occupiedSlots += 1 + entry.GuestCount;
                 if (occupiedSlots >= maxTeamSize)
@@ -243,13 +265,20 @@ class CompetitionService : ICompetitionService
         return false;
     }
 
-    public async Task<JoinCompetitionResponse> JoinCompetitionAsync(int competitionId, int playerId, JoinCompetitionRequest request)
+    public async Task<JoinCompetitionResponse> JoinCompetitionAsync(
+        int competitionId,
+        int playerId,
+        JoinCompetitionRequest request
+    )
     {
-        var competition = await _context.Competitions
-        .Include(c => c.Entries)
-        .Include(c => c.Teams)
-        .FirstOrDefaultAsync(c => c.Id == competitionId)
-        ?? throw new CompetitionNotFoundException($"Competition with ID {competitionId} was not found.");
+        var competition =
+            await _context
+                .Competitions.Include(c => c.Entries)
+                .Include(c => c.Teams)
+                .FirstOrDefaultAsync(c => c.Id == competitionId)
+            ?? throw new CompetitionNotFoundException(
+                $"Competition with ID {competitionId} was not found."
+            );
 
         DateTime now = DateTime.Now;
         if (now > competition.EndRegistration || now < competition.StartRegistration)
@@ -274,8 +303,10 @@ class CompetitionService : ICompetitionService
         }
 
         var entry = competition.Entries.FirstOrDefault(e =>
-            e.PlayerId == playerId &&
-            e.Status is not (CompetitionTeamEntryStatus.Pending or CompetitionTeamEntryStatus.Confirmed));
+            e.PlayerId == playerId
+            && e.Status
+                is not (CompetitionTeamEntryStatus.Pending or CompetitionTeamEntryStatus.Confirmed)
+        );
 
         if (entry != null)
         {
@@ -292,7 +323,7 @@ class CompetitionService : ICompetitionService
                 IsTeam = request.IsTeam,
                 GuestCount = request.GuestCount,
                 Comment = request.Comment,
-                Status = CompetitionTeamEntryStatus.Pending
+                Status = CompetitionTeamEntryStatus.Pending,
             };
             _context.CompetitionTeamEntries.Add(entry);
         }
@@ -301,7 +332,8 @@ class CompetitionService : ICompetitionService
         {
             await _context.SaveChangesAsync();
         }
-        catch (DbUpdateException ex) when (ex.InnerException?.Message.Contains("Duplicate entry") == true)
+        catch (DbUpdateException ex)
+            when (ex.InnerException?.Message.Contains("Duplicate entry") == true)
         {
             throw new AlreadyJoinedCompetitionException();
         }
@@ -313,13 +345,18 @@ class CompetitionService : ICompetitionService
             entry.GuestCount,
             entry.Comment,
             entry.Status.ToString(),
-            entry.JoinedAt);
+            entry.JoinedAt
+        );
     }
 
-    public async Task<CompetitionTeamEntry> UpdateEntry(int entryId, CompetitionTeamEntryRequest entry)
+    public async Task<CompetitionTeamEntry> UpdateEntry(
+        int entryId,
+        CompetitionTeamEntryRequest entry
+    )
     {
-        var competition_entry = await _context.CompetitionTeamEntries
-            .FirstOrDefaultAsync(e => e.Id == entryId);
+        var competition_entry = await _context.CompetitionTeamEntries.FirstOrDefaultAsync(e =>
+            e.Id == entryId
+        );
 
         if (competition_entry == null)
         {
@@ -328,10 +365,7 @@ class CompetitionService : ICompetitionService
 
         if (entry.TeamId != null)
         {
-            var team = await _context.Teams
-            .FirstOrDefaultAsync(t => t.Id == entry.TeamId);
-
-
+            var team = await _context.Teams.FirstOrDefaultAsync(t => t.Id == entry.TeamId);
 
             if (team == null)
                 throw new TeamNotFoundException();
@@ -341,21 +375,24 @@ class CompetitionService : ICompetitionService
         competition_entry.TeamId = entry.TeamId > 0 ? entry.TeamId : competition_entry.TeamId;
         competition_entry.Comment = entry.Comment ?? competition_entry.Comment;
         competition_entry.IsTeam = entry.IsTeam ?? competition_entry.IsTeam;
-        competition_entry.GuestCount = entry.GuestCount > 0 ? entry.GuestCount.Value : competition_entry.GuestCount;
+        competition_entry.GuestCount =
+            entry.GuestCount > 0 ? entry.GuestCount.Value : competition_entry.GuestCount;
 
         await _context.SaveChangesAsync();
 
         return competition_entry;
     }
 
-    public async Task<List<CompetitionTeamEntryResponse>> GetEntries(int organizerId, CompetitionTeamEntryStatus entryStatus)
+    public async Task<List<CompetitionTeamEntryResponse>> GetEntries(
+        int organizerId,
+        CompetitionTeamEntryStatus entryStatus
+    )
     {
-
-        var competitionTeamEntries = await _context.CompetitionTeamEntries
-        .Include(e => e.Player)
-        .Include(e => e.Team)
-        .Where(e => e.Competition.OrganizerId == organizerId && e.Status == entryStatus)
-        .ToListAsync();
+        var competitionTeamEntries = await _context
+            .CompetitionTeamEntries.Include(e => e.Player)
+            .Include(e => e.Team)
+            .Where(e => e.Competition.OrganizerId == organizerId && e.Status == entryStatus)
+            .ToListAsync();
 
         return competitionTeamEntries.Select(e => e.ToResponse()).ToList();
     }
