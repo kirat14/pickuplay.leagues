@@ -49,17 +49,7 @@ class CompetitionService : ICompetitionService
             Pennies = request.Pennies,
         };
 
-        String[] colors =
-        {
-            "yellow",
-            "red",
-            "green",
-            "blue",
-            "orange",
-            "purple",
-            "black",
-            "white",
-        };
+        String[] colors = { "yellow", "red", "green", "blue", "orange", "purple", "black", "gray" };
 
         for (int i = 0, j = 0; i < request.NbrOfTeams; i++, j++)
         {
@@ -149,7 +139,7 @@ class CompetitionService : ICompetitionService
                 "orange",
                 "purple",
                 "black",
-                "white",
+                "gray",
             };
 
             for (int i = 0, j = 0; i < request.TeamNames.Count; i++, j++)
