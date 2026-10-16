@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-
 using Pickuplay.Enums;
 
 namespace Pickuplay.DTOs;
@@ -14,9 +13,10 @@ public class CreateCompetitionRequest
     public string? Description { get; set; }
     public required DateTime StartRegistration { get; set; }
     public required DateTime EndRegistration { get; set; }
+
     [Range(1, int.MaxValue, ErrorMessage = "Number of teams must be at least 1.")]
     public required int NbrOfTeams { get; set; }
-    public required List<string> TeamNames { get; set; }
+    public List<string> TeamNames { get; set; } = default!;
     public int TeamSize { get; set; }
     public int NbrOfSubs { get; set; }
     public CompetitionFormat Format { get; set; }
