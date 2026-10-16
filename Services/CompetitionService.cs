@@ -49,9 +49,9 @@ class CompetitionService : ICompetitionService
             Pennies = request.Pennies,
         };
 
-        for (int i = 0; i < request.TeamNames.Count; i++)
+        for (int i = 0; i < request.NbrOfTeams; i++)
         {
-            var teamName = i < request.TeamNames.Count ? request.TeamNames[i] : $"Team {i + 1}";
+            var teamName = $"Team {i + 1}";
 
             competition.AddTeam(new Team { Name = teamName });
         }

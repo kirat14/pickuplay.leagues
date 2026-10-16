@@ -16,7 +16,7 @@ public class CreateCompetitionRequest
 
     [Range(1, int.MaxValue, ErrorMessage = "Number of teams must be at least 1.")]
     public required int NbrOfTeams { get; set; }
-    public List<string> TeamNames { get; set; } = default!;
+    public List<string>? TeamNames { get; set; } = default!;
     public int TeamSize { get; set; }
     public int NbrOfSubs { get; set; }
     public CompetitionFormat Format { get; set; }
