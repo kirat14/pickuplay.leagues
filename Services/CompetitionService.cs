@@ -49,11 +49,26 @@ class CompetitionService : ICompetitionService
             Pennies = request.Pennies,
         };
 
-        for (int i = 0; i < request.NbrOfTeams; i++)
+        String[] colors =
+        {
+            "yellow",
+            "red",
+            "green",
+            "blue",
+            "orange",
+            "purple",
+            "black",
+            "white",
+        };
+
+        for (int i = 0, j = 0; i < request.NbrOfTeams; i++, j++)
         {
             var teamName = $"Team {i + 1}";
 
-            competition.AddTeam(new Team { Name = teamName });
+            if (j >= colors.Length)
+                j = 0;
+
+            competition.AddTeam(new Team { Name = teamName, Color = colors[i] });
         }
 
         _context.Competitions.Add(competition);
@@ -136,11 +151,15 @@ class CompetitionService : ICompetitionService
                 "black",
                 "white",
             };
-            for (int i = 0; i < request.TeamNames.Count; i++)
+
+            for (int i = 0, j = 0; i < request.TeamNames.Count; i++, j++)
             {
                 var teamName = request.TeamNames[i];
 
-                competition.AddTeam(new Team { Name = teamName, Color = colors[i] });
+                if (j >= colors.Length)
+                    j = 0;
+
+                competition.AddTeam(new Team { Name = teamName, Color = colors[j] });
             }
         }
 
