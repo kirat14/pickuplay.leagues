@@ -68,7 +68,7 @@ class CompetitionService : ICompetitionService
             if (j >= colors.Length)
                 j = 0;
 
-            competition.AddTeam(new Team { Name = teamName, Color = colors[i] });
+            competition.AddTeam(new Team { Name = teamName, Color = colors[j] });
         }
 
         _context.Competitions.Add(competition);
