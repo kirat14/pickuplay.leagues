@@ -1,22 +1,20 @@
+using System.Security.Cryptography;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-
 using Pickuplay.DTOs;
 using Pickuplay.Enums;
 using Pickuplay.Services;
 using Pickuplay.Teams;
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.Payments;
+using Pickuplay.Teams.Payments.Handlers;
 using Pickuplay.Teams.Payments.Jobs;
-
+using Pickuplay.Teams.Payments.Options;
 using Stripe;
-
-using System.Security.Cryptography;
-using System.Text.Json.Serialization;
-
 using File = System.IO.File;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,16 +24,14 @@ builder.Services.AddOpenApi();
 
 // Add DbContext with Mysql
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySQL(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options => options.UseMySQL(connectionString));
 
 // Controllers
-builder.Services.AddControllers()
-.AddJsonOptions(options =>
+builder
+    .Services.AddControllers()
+    .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter()
-        );
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
 // Job service
@@ -53,27 +49,25 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
     {
-        var errors = context.ModelState
-        .Where(x => x.Value?.Errors.Count > 0)
-        .Select(x => new
-        {
-            Field = x.Key,
-            Message = x.Value!.Errors.First().ErrorMessage
-        });
+        var errors = context
+            .ModelState.Where(x => x.Value?.Errors.Count > 0)
+            .Select(x => new { Field = x.Key, Message = x.Value!.Errors.First().ErrorMessage });
 
-        return new BadRequestObjectResult(new ApiResponse<object>(
-            type: ApiResponseStatus.Error,
-            message: errors.First().Message,
-            data: null
-        ));
+        return new BadRequestObjectResult(
+            new ApiResponse<object>(
+                type: ApiResponseStatus.Error,
+                message: errors.First().Message,
+                data: null
+            )
+        );
     };
 });
 
-builder.Services
-    .AddOptions<StripeOptions>()
+builder
+    .Services.AddOptions<StripeOptions>()
     .Bind(builder.Configuration.GetSection(StripeOptions.SectionName))
     .ValidateDataAnnotations()
-    .ValidateOnStart();   // app fails fast if a key is missing
+    .ValidateOnStart(); // app fails fast if a key is missing
 
 builder.Services.AddSingleton<IStripeClient>(sp =>
 {
@@ -81,33 +75,53 @@ builder.Services.AddSingleton<IStripeClient>(sp =>
     return new StripeClient(opts.SecretKey);
 });
 
+builder
+    .Services.AddOptions<SpringOptions>()
+    .Bind(builder.Configuration.GetSection(SpringOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddHttpClient<GamePaymentHandler>(
+    (sp, client) =>
+    {
+        var opts = sp.GetRequiredService<IOptions<SpringOptions>>().Value;
+        client.BaseAddress = new Uri(opts.BaseUrl);
+        client.DefaultRequestHeaders.Add("X-Api-Key", opts.ApiKey);
+        client.Timeout = TimeSpan.FromSeconds(10);
+    }
+);
+
+builder.Services.AddTransient<IPaymentItemHandler>(sp =>
+    sp.GetRequiredService<GamePaymentHandler>()
+);
+
 // Load the public key
 var publicKeyPem = File.ReadAllText("./resources/certs/public.pem");
 var rsa = RSA.Create();
 rsa.ImportFromPem(publicKeyPem);
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+builder
+    .Services.AddAuthentication(options =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new RsaSecurityKey(rsa),
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new RsaSecurityKey(rsa),
 
-        ValidateIssuer = true,
-        ValidIssuer = "self", // must match Spring Boot's issuer claim
+            ValidateIssuer = true,
+            ValidIssuer = "self", // must match Spring Boot's issuer claim
 
-        ValidateAudience = false, // set true later if you add audience claims
+            ValidateAudience = false, // set true later if you add audience claims
 
-        ValidateLifetime = true, // checks expiration
-        ClockSkew = TimeSpan.Zero // no grace period on expiration
-    };
-});
-
+            ValidateLifetime = true, // checks expiration
+            ClockSkew = TimeSpan.Zero, // no grace period on expiration
+        };
+    });
 
 var app = builder.Build();
 
@@ -122,12 +136,16 @@ if (app.Environment.IsDevelopment())
     {
         Directory.CreateDirectory(storagePath);
 
-        app.UseStaticFiles(new StaticFileOptions
-        {
-            FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(storagePath),
-            RequestPath = "/uploads",
-            ServeUnknownFileTypes = true
-        });
+        app.UseStaticFiles(
+            new StaticFileOptions
+            {
+                FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+                    storagePath
+                ),
+                RequestPath = "/uploads",
+                ServeUnknownFileTypes = true,
+            }
+        );
     }
 }
 

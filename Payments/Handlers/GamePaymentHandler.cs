@@ -1,0 +1,19 @@
+using Microsoft.Extensions.Options;
+using Pickuplay.Teams.Payments.Models;
+using Pickuplay.Teams.Payments.Options;
+
+namespace Pickuplay.Teams.Payments.Handlers;
+
+public sealed class GamePaymentHandler(HttpClient http, IOptions<SpringOptions> options)
+    : IPaymentItemHandler
+{
+    public string ItemType => "Game";
+
+    public async Task OnPaidAsync(string itemId, CancellationToken ct)
+    {
+        var path = options.Value.GameUserStatusPath.Replace("{itemId}", itemId);
+
+        var response = await http.PatchAsJsonAsync(path, new { status = "JOINED" }, ct);
+        response.EnsureSuccessStatusCode();
+    }
+}

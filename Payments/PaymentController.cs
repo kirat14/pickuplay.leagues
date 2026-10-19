@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Pickuplay.DTOs;
 using Pickuplay.Enums;
 using Pickuplay.Teams.Payments.DTO;
+using Pickuplay.Teams.Payments.Options;
 using Stripe;
 
 namespace Pickuplay.Teams.Payments;
