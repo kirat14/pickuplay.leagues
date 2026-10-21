@@ -26,6 +26,7 @@ public sealed class PaymentService(
         CancellationToken ct
     )
     {
+        _logger.LogInformation("### Service");
         var intents = new PaymentIntentService(stripeClient);
         var now = DateTime.UtcNow;
 
@@ -42,21 +43,24 @@ public sealed class PaymentService(
 
         if (existing is not null)
         {
+            _logger.LogInformation("### existing");
             var intent = await intents.GetAsync(
                 existing.StripePaymentIntentId,
                 cancellationToken: ct
             );
 
+            _logger.LogInformation("### intent status {}", intent.Status);
+
             switch (intent.Status)
             {
                 case "requires_payment_method" or "requires_action" or "requires_confirmation":
-                    if (existing.AmountInCents == amountInCents)
-                        return intent.ClientSecret;
+
+                    return intent.ClientSecret;
 
                     // Price changed: cancel the old intent, a new one is created below
-                    await intents.CancelAsync(intent.Id, cancellationToken: ct);
+                    /* await intents.CancelAsync(intent.Id, cancellationToken: ct);
                     existing.Status = PaymentStatus.Canceled;
-                    await db.SaveChangesAsync(ct);
+                    await db.SaveChangesAsync(ct); */
                     break;
 
                 case "succeeded"

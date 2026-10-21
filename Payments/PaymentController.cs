@@ -21,6 +21,7 @@ public class PaymentsController(PaymentService paymentService, ILogger<PaymentsC
         CancellationToken ct
     )
     {
+        logger.LogInformation("Here");
         var userId = User.FindFirst("id")?.Value;
 
         if (!int.TryParse(userId, out var playerId))
