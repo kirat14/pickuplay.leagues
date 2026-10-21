@@ -29,7 +29,7 @@ public class PaymentsController(PaymentService paymentService, ILogger<PaymentsC
         }
 
         long.TryParse(userId, out long userIdLong);
-        var result = await paymentService.CreateIntentAsync(
+        var clientSecret = await paymentService.CreateIntentAsync(
             userIdLong,
             request.ItemType,
             request.ItemId,
@@ -41,7 +41,7 @@ public class PaymentsController(PaymentService paymentService, ILogger<PaymentsC
             new ApiResponse<object>(
                 ApiResponseStatus.Success,
                 "Intent Created successfully.",
-                new { clientSecret = result.ClientSecret, status = result.Status.ToString() }
+                clientSecret
             )
         );
     }

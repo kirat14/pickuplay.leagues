@@ -18,7 +18,7 @@ public sealed class PaymentService(
 {
     public sealed record CreateIntentResult(string? ClientSecret, PaymentStatus Status);
 
-    public async Task<CreateIntentResult> CreateIntentAsync(
+    public async Task<string?> CreateIntentAsync(
         long userId,
         string itemType,
         string itemId,
@@ -51,7 +51,7 @@ public sealed class PaymentService(
             {
                 case "requires_payment_method" or "requires_action" or "requires_confirmation":
                     if (existing.AmountInCents == amountInCents)
-                        return new CreateIntentResult(intent.ClientSecret, PaymentStatus.Pending);
+                        return intent.ClientSecret;
 
                     // Price changed: cancel the old intent, a new one is created below
                     await intents.CancelAsync(intent.Id, cancellationToken: ct);
@@ -62,7 +62,7 @@ public sealed class PaymentService(
                 case "succeeded"
                 or "processing":
                     // Webhook will finish the update, nothing to pay
-                    return new CreateIntentResult(null, PaymentStatus.Pending);
+                    return null;
 
                 case "canceled":
                     existing.Status = PaymentStatus.Canceled;
@@ -106,7 +106,7 @@ public sealed class PaymentService(
         );
         await db.SaveChangesAsync(ct);
 
-        return new CreateIntentResult(newIntent.ClientSecret, PaymentStatus.Pending);
+        return newIntent.ClientSecret;
     }
 
     public async Task HandleStripeEventAsync(Event stripeEvent, CancellationToken ct)
