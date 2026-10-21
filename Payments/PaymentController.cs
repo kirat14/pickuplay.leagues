@@ -28,8 +28,9 @@ public class PaymentsController(PaymentService paymentService, ILogger<PaymentsC
             throw new UnauthorizedAccessException("User ID could not be found in the token.");
         }
 
-        var clientSecret = await paymentService.CreateIntentAsync(
-            playerId,
+        long.TryParse(userId, out long userIdLong);
+        var result = await paymentService.CreateIntentAsync(
+            userIdLong,
             request.ItemType,
             request.ItemId,
             request.AmountInCents,
@@ -37,10 +38,10 @@ public class PaymentsController(PaymentService paymentService, ILogger<PaymentsC
         );
 
         return Ok(
-            new ApiResponse<string>(
+            new ApiResponse<object>(
                 ApiResponseStatus.Success,
                 "Intent Created successfully.",
-                clientSecret
+                new { clientSecret = result.ClientSecret, status = result.Status.ToString() }
             )
         );
     }

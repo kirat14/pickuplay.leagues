@@ -15,7 +15,9 @@ public sealed class PaymentService(
     AppDbContext db
 )
 {
-    public async Task<string> CreateIntentAsync(
+    public sealed record CreateIntentResult(string? ClientSecret, PaymentStatus Status);
+
+    public async Task<CreateIntentResult> CreateIntentAsync(
         long userId,
         string itemType,
         string itemId,
@@ -23,22 +25,66 @@ public sealed class PaymentService(
         CancellationToken ct
     )
     {
-        var service = new PaymentIntentService(stripeClient);
+        var intents = new PaymentIntentService(stripeClient);
+        var now = DateTime.UtcNow;
 
-        var options = new PaymentIntentCreateOptions
+        var existing = await db
+            .Payments.Where(p =>
+                p.UserId == userId
+                && p.ItemType == itemType
+                && p.ItemId == itemId
+                && p.Status == PaymentStatus.Pending
+                && p.ExpiresAt > now
+            )
+            .OrderByDescending(p => p.CreatedAt)
+            .FirstOrDefaultAsync(ct);
+
+        if (existing is not null)
         {
-            Amount = amountInCents,
-            Currency = "usd",
-            AllowedPaymentMethodTypes = new List<string> { "card" },
-            Metadata = new Dictionary<string, string>
-            {
-                ["userId"] = userId.ToString(),
-                ["itemType"] = itemType,
-                ["itemId"] = itemId,
-            },
-        };
+            var intent = await intents.GetAsync(
+                existing.StripePaymentIntentId,
+                cancellationToken: ct
+            );
 
-        var intent = await service.CreateAsync(options, cancellationToken: ct);
+            switch (intent.Status)
+            {
+                case "requires_payment_method" or "requires_action" or "requires_confirmation":
+                    if (existing.AmountInCents == amountInCents)
+                        return new CreateIntentResult(intent.ClientSecret, PaymentStatus.Pending);
+
+                    // Price changed: cancel the old intent, a new one is created below
+                    await intents.CancelAsync(intent.Id, cancellationToken: ct);
+                    existing.Status = PaymentStatus.Canceled;
+                    await db.SaveChangesAsync(ct);
+                    break;
+
+                case "succeeded"
+                or "processing":
+                    // Webhook will finish the update, nothing to pay
+                    return new CreateIntentResult(null, PaymentStatus.Pending);
+
+                case "canceled":
+                    existing.Status = PaymentStatus.Canceled;
+                    await db.SaveChangesAsync(ct);
+                    break;
+            }
+        }
+
+        var newIntent = await intents.CreateAsync(
+            new PaymentIntentCreateOptions
+            {
+                Amount = amountInCents,
+                Currency = "usd",
+                AllowedPaymentMethodTypes = new List<string> { "card" },
+                Metadata = new Dictionary<string, string>
+                {
+                    ["userId"] = userId.ToString(),
+                    ["itemType"] = itemType,
+                    ["itemId"] = itemId,
+                },
+            },
+            cancellationToken: ct
+        );
 
         db.Payments.Add(
             new PaymentEntity
@@ -49,14 +95,14 @@ public sealed class PaymentService(
                 AmountInCents = amountInCents,
                 Currency = "usd",
                 Status = PaymentStatus.Pending,
-                StripePaymentIntentId = intent.Id,
+                StripePaymentIntentId = newIntent.Id,
                 CreatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(15),
             }
         );
         await db.SaveChangesAsync(ct);
 
-        return intent.ClientSecret;
+        return new CreateIntentResult(newIntent.ClientSecret, PaymentStatus.Pending);
     }
 
     public async Task HandleStripeEventAsync(Event stripeEvent, CancellationToken ct)
