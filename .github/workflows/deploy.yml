@@ -53,7 +53,7 @@ jobs:
             echo 'Stripe__WebhookSecret=${{ secrets.STRIPE_WEBHOOK_SECRET }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
             echo 'Spring__BaseUrl=${{ secrets.SPRING_BASE_URL }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
             echo 'Spring__ApiKey=${{ secrets.INTERNAL_API_KEY }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
-            echo 'Spring__GameUserStatusPath=${{ vars.SPRING_GAME_USER_STATUS_PATH }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
+            echo 'Spring__GameUserStatusPath=${{ secrets.SPRING_GAME_USER_STATUS_PATH }}' | sudo tee -a /etc/pickuplay-teams.env > /dev/null
             sudo chmod 600 /etc/pickuplay-teams.env
 
       - name: Restart service
