@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Pickuplay.Teams.Data;
@@ -21,7 +22,7 @@ public sealed class PaymentService(
         long userId,
         string itemType,
         string itemId,
-        long amountInCents,
+        long? amountInCents,
         CancellationToken ct
     )
     {
@@ -70,6 +71,9 @@ public sealed class PaymentService(
             }
         }
 
+        if (amountInCents is null)
+            throw new ArgumentException("Amount is required.", nameof(amountInCents));
+
         var newIntent = await intents.CreateAsync(
             new PaymentIntentCreateOptions
             {
@@ -92,7 +96,7 @@ public sealed class PaymentService(
                 UserId = userId,
                 ItemType = itemType,
                 ItemId = itemId,
-                AmountInCents = amountInCents,
+                AmountInCents = amountInCents.Value,
                 Currency = "usd",
                 Status = PaymentStatus.Pending,
                 StripePaymentIntentId = newIntent.Id,

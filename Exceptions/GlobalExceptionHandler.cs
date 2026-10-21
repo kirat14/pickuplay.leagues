@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Diagnostics;
-
 using Pickuplay.DTOs;
 using Pickuplay.Enums;
 using Pickuplay.Teams.Exceptions;
@@ -14,14 +13,15 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         _logger = logger;
     }
+
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var (statusCode, message) = exception switch
         {
-
             UnauthorizedAccessException ex => (StatusCodes.Status401Unauthorized, ex.Message),
             AlreadyJoinedCompetitionException ex => (StatusCodes.Status409Conflict, ex.Message),
             TeamFullException ex => (StatusCodes.Status409Conflict, ex.Message),
@@ -29,9 +29,13 @@ public class GlobalExceptionHandler : IExceptionHandler
             TeamNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             CompetitionNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
             CompetitionTeamEntryNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
-            CompetitionRegistrationPeriodException ex => (StatusCodes.Status409Conflict, ex.Message),
+            CompetitionRegistrationPeriodException ex => (
+                StatusCodes.Status409Conflict,
+                ex.Message
+            ),
             InvalidOperationException ex => (StatusCodes.Status409Conflict, ex.Message),
-            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+            ArgumentException ex => (StatusCodes.Status400BadRequest, ex.Message),
+            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred."),
         };
 
         if (exception is DomainException or UnauthorizedAccessException)
