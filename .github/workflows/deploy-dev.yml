@@ -1,0 +1,65 @@
+name: Deploy to Development
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Install EF Core tools
+        run: |
+          dotnet tool install --global dotnet-ef
+          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+
+      - name: Apply EF Core migrations
+        run: dotnet ef database update --connection "${{ secrets.DEV_DB_CONNECTION_STRING }}"
+
+      - name: Publish
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          source: "publish/*"
+          target: "/var/www/dev/pickuplay-competitions/publish"
+          strip_components: 1
+
+      - name: Update production env file
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            echo 'ConnectionStrings__DefaultConnection=${{ secrets.DEV_DB_CONNECTION_STRING }}' | sudo tee /etc/dev-pickuplay-teams.env > /dev/null
+            echo 'Stripe__SecretKey=${{ secrets.DEV_STRIPE_SECRET_KEY }}' | sudo tee -a /etc/dev-pickuplay-teams.env > /dev/null
+            echo 'Stripe__WebhookSecret=${{ secrets.DEV_STRIPE_WEBHOOK_SECRET }}' | sudo tee -a /etc/dev-pickuplay-teams.env > /dev/null
+            echo 'Spring__BaseUrl=${{ secrets.DEV_SPRING_BASE_URL }}' | sudo tee -a /etc/dev-pickuplay-teams.env > /dev/null
+            echo 'Spring__ApiKey=${{ secrets.INTERNAL_API_KEY }}' | sudo tee -a /etc/dev-pickuplay-teams.env > /dev/null
+            echo 'Spring__GameUserStatusPath=${{ secrets.SPRING_GAME_USER_STATUS_PATH }}' | sudo tee -a /etc/dev-pickuplay-teams.env > /dev/null
+            sudo chmod 600 /etc/dev-pickuplay-teams.env
+
+      - name: Restart service
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: sudo systemctl restart dev-pickuplay-teams
