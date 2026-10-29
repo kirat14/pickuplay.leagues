@@ -1,16 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-
 using Pickuplay.Teams.Data;
 using Pickuplay.Teams.Payments.Enums;
+using Pickuplay.Teams.Payments.Handlers;
 using Pickuplay.Teams.Payments.Models;
-
 using Stripe;
 
 namespace Pickuplay.Teams.Payments.Jobs;
 
 public sealed class PaymentExpiryService(
     IServiceScopeFactory scopeFactory,
-    ILogger<PaymentExpiryService> logger) : BackgroundService
+    ILogger<PaymentExpiryService> logger,
+    IEnumerable<IPaymentItemHandler> _handlers
+) : BackgroundService
 {
     private static readonly TimeSpan Interval = TimeSpan.FromMinutes(1);
 
@@ -29,8 +30,8 @@ public sealed class PaymentExpiryService(
                 var stripeClient = scope.ServiceProvider.GetRequiredService<IStripeClient>();
 
                 var now = DateTime.UtcNow;
-                var expired = await db.Payments
-                    .Where(p => p.Status == PaymentStatus.Pending && p.ExpiresAt <= now)
+                var expired = await db
+                    .Payments.Where(p => p.Status == PaymentStatus.Pending && p.ExpiresAt <= now)
                     .OrderBy(p => p.ExpiresAt)
                     .Take(50)
                     .ToListAsync(stoppingToken);
@@ -52,7 +53,8 @@ public sealed class PaymentExpiryService(
         AppDbContext db,
         IStripeClient stripeClient,
         List<PaymentEntity> expired,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var intents = new PaymentIntentService(stripeClient);
 
@@ -64,10 +66,14 @@ public sealed class PaymentExpiryService(
 
                 payment.Status = PaymentStatus.Canceled;
                 await db.SaveChangesAsync(ct);
+                await GetHandler(payment.ItemType).OnCancelAsync(payment.ItemId, ct);
             }
             catch (StripeException)
             {
-                var intent = await intents.GetAsync(payment.StripePaymentIntentId, cancellationToken: ct);
+                var intent = await intents.GetAsync(
+                    payment.StripePaymentIntentId,
+                    cancellationToken: ct
+                );
 
                 if (intent.Status == "succeeded")
                 {
@@ -76,14 +82,23 @@ public sealed class PaymentExpiryService(
                 else if (intent.Status == "canceled")
                 {
                     payment.Status = PaymentStatus.Canceled;
+
                     await db.SaveChangesAsync(ct);
                 }
                 else
                 {
-                    logger.LogError("Could not cancel payment {Id}, intent status {Status}",
-                        payment.Id, intent.Status);
+                    logger.LogError(
+                        "Could not cancel payment {Id}, intent status {Status}",
+                        payment.Id,
+                        intent.Status
+                    );
                 }
             }
         }
     }
+
+    private IPaymentItemHandler GetHandler(string itemType) =>
+        _handlers.FirstOrDefault(h =>
+            string.Equals(h.ItemType, itemType, StringComparison.OrdinalIgnoreCase)
+        ) ?? throw new InvalidOperationException($"No handler for item type {itemType}");
 }

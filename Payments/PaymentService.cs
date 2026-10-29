@@ -94,6 +94,9 @@ public sealed class PaymentService(
             cancellationToken: ct
         );
 
+        _logger.LogInformation("Intent Time {}", newIntent.Created);
+        _logger.LogInformation("System Time {}", DateTime.UtcNow);
+
         db.Payments.Add(
             new PaymentEntity
             {
@@ -104,8 +107,8 @@ public sealed class PaymentService(
                 Currency = "usd",
                 Status = PaymentStatus.Pending,
                 StripePaymentIntentId = newIntent.Id,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddMinutes(15),
+                CreatedAt = newIntent.Created,
+                ExpiresAt = newIntent.Created.AddMinutes(15),
             }
         );
         await db.SaveChangesAsync(ct);
@@ -129,6 +132,13 @@ public sealed class PaymentService(
             p.StripePaymentIntentId == intent.Id && p.Status == PaymentStatus.Pending
         );
 
+        var currentPayment = await db
+            .Payments.AsNoTracking()
+            .FirstOrDefaultAsync(
+                p => p.StripePaymentIntentId == intent.Id && p.Status == PaymentStatus.Succeeded,
+                ct
+            );
+
         switch (stripeEvent.Type)
         {
             case EventTypes.PaymentIntentSucceeded:
@@ -140,17 +150,9 @@ public sealed class PaymentService(
                     ct
                 );
 
-                var payment = await db
-                    .Payments.AsNoTracking()
-                    .FirstOrDefaultAsync(
-                        p =>
-                            p.StripePaymentIntentId == intent.Id
-                            && p.Status == PaymentStatus.Succeeded,
-                        ct
-                    );
-
-                if (payment is not null)
-                    await GetHandler(payment.ItemType).OnPaidAsync(payment.ItemId, ct);
+                if (currentPayment is not null)
+                    await GetHandler(currentPayment.ItemType)
+                        .OnPaidAsync(currentPayment.ItemId, ct);
                 break;
 
             case EventTypes.PaymentIntentCanceled:
@@ -158,6 +160,10 @@ public sealed class PaymentService(
                     setters => setters.SetProperty(p => p.Status, PaymentStatus.Canceled),
                     ct
                 );
+
+                if (currentPayment is not null)
+                    await GetHandler(currentPayment.ItemType)
+                        .OnCancelAsync(currentPayment.ItemId, ct);
                 break;
 
             case EventTypes.PaymentIntentPaymentFailed:

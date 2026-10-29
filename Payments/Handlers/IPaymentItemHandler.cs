@@ -6,4 +6,5 @@ public interface IPaymentItemHandler
 {
     string ItemType { get; }
     Task OnPaidAsync(string itemId, CancellationToken ct);
+    Task OnCancelAsync(string itemId, CancellationToken ct);
 }
