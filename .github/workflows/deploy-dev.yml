@@ -27,6 +27,8 @@ jobs:
 
       - name: Apply EF Core migrations
         run: dotnet ef database update --connection "${{ secrets.DEV_DB_CONNECTION_STRING }}"
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.DEV_DB_CONNECTION_STRING }}
 
       - name: Publish
         run: dotnet publish -c Release -o ./publish
