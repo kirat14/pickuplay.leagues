@@ -122,7 +122,7 @@ public sealed class PaymentService(
             return;
 
         _logger.LogInformation(
-            "Stripe event {EventId} ({Type}) for intent {IntentId}",
+            "======== Stripe event {EventId} ({Type}) for intent {IntentId} ======== ",
             stripeEvent.Id,
             stripeEvent.Type,
             intent.Id
@@ -134,10 +134,7 @@ public sealed class PaymentService(
 
         var currentPayment = await db
             .Payments.AsNoTracking()
-            .FirstOrDefaultAsync(
-                p => p.StripePaymentIntentId == intent.Id && p.Status == PaymentStatus.Succeeded,
-                ct
-            );
+            .FirstOrDefaultAsync(p => p.StripePaymentIntentId == intent.Id, ct);
 
         switch (stripeEvent.Type)
         {
@@ -151,8 +148,12 @@ public sealed class PaymentService(
                 );
 
                 if (currentPayment is not null)
+                {
+                    _logger.LogInformation("======== Payment Found calling OnPaidAsync ======== ");
+
                     await GetHandler(currentPayment.ItemType)
                         .OnPaidAsync(currentPayment.ItemId, ct);
+                }
                 break;
 
             case EventTypes.PaymentIntentCanceled:
@@ -162,8 +163,14 @@ public sealed class PaymentService(
                 );
 
                 if (currentPayment is not null)
+                {
+                    _logger.LogInformation(
+                        "======== Payment Found calling OnCancelAsync ======== "
+                    );
+
                     await GetHandler(currentPayment.ItemType)
                         .OnCancelAsync(currentPayment.ItemId, ct);
+                }
                 break;
 
             case EventTypes.PaymentIntentPaymentFailed:
@@ -178,11 +185,14 @@ public sealed class PaymentService(
                 break;
         }
 
-        _logger.LogInformation("Event {EventId} processed", stripeEvent.Id);
+        _logger.LogInformation("======== Event {EventId} processed ======== ", stripeEvent.Id);
     }
 
     private IPaymentItemHandler GetHandler(string itemType) =>
         _handlers.FirstOrDefault(h =>
             string.Equals(h.ItemType, itemType, StringComparison.OrdinalIgnoreCase)
-        ) ?? throw new InvalidOperationException($"No handler for item type {itemType}");
+        )
+        ?? throw new InvalidOperationException(
+            $"======== No handler for item type {itemType} ========"
+        );
 }
