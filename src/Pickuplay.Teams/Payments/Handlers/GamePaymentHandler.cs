@@ -11,6 +11,8 @@ public sealed class GamePaymentHandler(HttpClient http, IOptions<SpringOptions> 
 
     public async Task OnCancelAsync(string itemId, CancellationToken ct)
     {
+        _logger.LogInformation("Game Handler for ItemId {}", itemId);
+
         var path = options.Value.GameUserStatusPath.Replace("{itemId}", itemId);
 
         var response = await http.PatchAsJsonAsync(path, new { status = "CANCELLED" }, ct);
