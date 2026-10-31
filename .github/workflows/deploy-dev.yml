@@ -26,12 +26,12 @@ jobs:
           echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Apply EF Core migrations
-        run: dotnet ef database update --connection "${{ secrets.DEV_DB_CONNECTION_STRING }}"
+        run: dotnet ef database update --project src/Pickuplay.Teams/Pickuplay.Teams.csproj --connection "${{ secrets.DEV_DB_CONNECTION_STRING }}"
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.DEV_DB_CONNECTION_STRING }}
 
       - name: Publish
-        run: dotnet publish -c Release -o ./publish
+        run: dotnet publish src/Pickuplay.Teams/Pickuplay.Teams.csproj -c Release -o ./publish
 
       - name: Copy files to server
         uses: appleboy/scp-action@v0.1.7
