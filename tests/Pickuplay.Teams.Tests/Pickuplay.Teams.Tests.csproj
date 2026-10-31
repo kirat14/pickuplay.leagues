@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Pickuplay.Teams\PICKUPLAY.TEAMS.csproj" />
+    <ProjectReference Include="..\..\src\Pickuplay.Teams\Pickuplay.Teams.csproj" />
   </ItemGroup>
 
 </Project>

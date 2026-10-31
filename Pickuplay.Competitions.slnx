@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/Pickuplay.Teams/">
-    <Project Path="src/Pickuplay.Teams/PICKUPLAY.TEAMS.csproj" />
+    <Project Path="src/Pickuplay.Teams/Pickuplay.Teams.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Pickuplay.Teams.Tests/Pickuplay.Teams.Tests.csproj" />
